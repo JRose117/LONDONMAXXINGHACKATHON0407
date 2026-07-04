@@ -360,7 +360,6 @@ nav.tabs {
 
 /* Collection view */
 #view-collection {
-  display: flex;
   flex-direction: column;
   overflow: hidden;
   padding: 16px;
@@ -378,13 +377,44 @@ nav.tabs {
   font-weight: 600;
   letter-spacing: -0.025em;
   color: var(--text);
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+}
+
+.collection-progress {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
 }
 
 .progress-counter {
   font-family: var(--header-font);
   font-size: 14px;
   color: var(--text-dim);
+}
+
+.progress-percent {
+  font-family: var(--header-font);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.progress-bar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #4ade80, #22c55e);
+  border-radius: 999px;
+  transition: width 0.35s ease;
 }
 
 .collection-grid {
@@ -539,6 +569,69 @@ nav.tabs {
 
 .settings-btn--danger:active {
   background: rgba(127, 29, 29, 0.5);
+}
+
+.settings-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  min-height: 48px;
+}
+
+.settings-toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.settings-toggle-track {
+  position: relative;
+  flex-shrink: 0;
+  width: 48px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  transition: background 0.2s ease;
+}
+
+.settings-toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+
+.settings-toggle input:checked + .settings-toggle-track {
+  background: #3b82f6;
+}
+
+.settings-toggle input:checked + .settings-toggle-track::after {
+  transform: translateX(20px);
+}
+
+.settings-toggle input:disabled + .settings-toggle-track {
+  opacity: 0.4;
+}
+
+.settings-toggle-label {
+  font-family: var(--header-font);
+  font-size: 14px;
+  color: var(--text);
+}
+
+.settings-notif-status {
+  font-family: var(--header-font);
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.4;
+  margin: 0;
 }
 
 .card-3d-wrap {

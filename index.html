@@ -21,6 +21,7 @@
     <nav class="tabs" aria-label="Main navigation">
       <button class="tab-btn active" data-view="map">Map</button>
       <button class="tab-btn" data-view="collection">Collection</button>
+      <button class="tab-btn" data-view="settings">Settings</button>
     </nav>
   </header>
 
@@ -55,7 +56,13 @@
   <div id="view-collection" class="view">
     <div class="collection-header">
       <h2>Collection</h2>
-      <div class="progress-counter" id="progress-counter">0 / 10 collected</div>
+      <div class="collection-progress">
+        <div class="progress-counter" id="progress-counter">0 / 10 collected</div>
+        <div class="progress-percent" id="progress-percent">0%</div>
+      </div>
+      <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-bar">
+        <div class="progress-bar-fill" id="progress-bar-fill"></div>
+      </div>
     </div>
     <div id="collection-grid" class="ag-theme-alpine-dark collection-grid"></div>
     <div class="collection-footer">
@@ -72,6 +79,16 @@
       <section class="settings-section">
         <h3 class="settings-section-title">Profile</h3>
         <button type="button" id="change-photo-btn" class="settings-btn">Change profile photo</button>
+      </section>
+      <section class="settings-section">
+        <h3 class="settings-section-title">Notifications</h3>
+        <p class="settings-section-desc" id="notif-desc">Get alerted when you're near an uncollected landmark. On iPhone, install the app to your Home Screen first — browser tabs can't send alerts.</p>
+        <label class="settings-toggle">
+          <input type="checkbox" id="notif-toggle">
+          <span class="settings-toggle-track" aria-hidden="true"></span>
+          <span class="settings-toggle-label">Proximity alerts</span>
+        </label>
+        <p class="settings-notif-status" id="notif-status"></p>
       </section>
       <section class="settings-section settings-section--danger">
         <h3 class="settings-section-title">Landmarks</h3>
@@ -108,6 +125,9 @@
     const PROFILE_KEY = 'unlock-london:profile';
     const PHOTO_SKIP_KEY = 'unlock-london:photo-skip';
     const COLLECTION_PHOTOS_KEY = 'unlock-london:collection-photos';
+    const NOTIF_KEY = 'unlock-london:notifications';
+    const NEARBY_RADIUS_M = 300;
+    const NOTIF_ICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%230f0f13'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-size='280'%3E🏛️%3C/text%3E%3C/svg%3E";
     const CONFIDENCE_ENDPOINT = 'https://blcbcowiijjtlufordcl.supabase.co/functions/v1/swift-responder';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsY2Jjb3dpaWpqdGx1Zm9yZGNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDk1NzgsImV4cCI6MjA5Nzk4NTU3OH0.QkZMFfpcTDchc0zHyQ0cj0LFm09kxR_hukKoXwiTBrY';
     const CONFIDENCE_THRESHOLD = 7;
@@ -158,6 +178,8 @@
     let orientationHandler = null;
     const markersById = {};
     const claimableIds = new Set();
+    const notifiedNearby = new Set();
+    let notificationsEnabled = false;
     let pendingClaimLandmarkId = null;
     let claimInProgress = false;
     let geoWatchId = null;
@@ -200,6 +222,23 @@
       return { lat: lat + dLat, lng: lng + dLng };
     }
 
+    function randomPointInZone(lat, lng, radiusM) {
+      const angle = Math.random() * 360;
+      const distanceM = Math.sqrt(Math.random()) * radiusM;
+      return offsetCoords(lat, lng, distanceM, angle);
+    }
+
+    function setAlertCoords(lm) {
+      const point = randomPointInZone(lm.lat, lm.lng, FUZZ_RADIUS_M);
+      lm.alertLat = point.lat;
+      lm.alertLng = point.lng;
+    }
+
+    function clearAlertCoords(lm) {
+      delete lm.alertLat;
+      delete lm.alertLng;
+    }
+
     function applyLocationFuzz(lm) {
       const h = hashId(lm.id);
       const angle = (h % 3600) / 10;
@@ -211,6 +250,7 @@
 
     function getMarkerCoords(lm) {
       if (lm.unlocked) return { lat: lm.lat, lng: lm.lng };
+      if (lm.alertLat != null) return { lat: lm.alertLat, lng: lm.alertLng };
       return { lat: lm.displayLat, lng: lm.displayLng };
     }
 
@@ -311,8 +351,10 @@
         lm.unlocked = false;
         delete lm.proofPhoto;
         delete lm.proofResult;
+        clearAlertCoords(lm);
       });
       memoryUnlockedIds.clear();
+      clearProximityNotificationState();
 
       try {
         localStorage.removeItem(STORAGE_KEY);
@@ -666,28 +708,219 @@
           return;
         }
         const dist = getLandmarkProximityM(lm);
-        if (dist <= 300) el.classList.add('nearby');
+        if (dist <= NEARBY_RADIUS_M) {
+          el.classList.add('nearby');
+          if (!notifiedNearby.has(lm.id)) {
+            notifiedNearby.add(lm.id);
+            onLandmarkNearby(lm);
+          }
+        } else {
+          notifiedNearby.delete(lm.id);
+        }
         if (isInVicinity(lm)) {
           el.classList.add('in-range', 'claimable');
           const disc = el.querySelector('.poi-disc');
           if (disc) disc.textContent = '!';
           if (!claimableIds.has(lm.id)) {
+            setAlertCoords(lm);
+            markersById[lm.id]?.setLngLat([lm.alertLng, lm.alertLat]);
             claimableIds.add(lm.id);
             onLandmarkClaimable(lm);
           }
         } else {
           const disc = el.querySelector('.poi-disc');
           if (disc) disc.textContent = '?';
+          if (claimableIds.has(lm.id) || lm.alertLat != null) {
+            clearAlertCoords(lm);
+            markersById[lm.id]?.setLngLat([lm.displayLng, lm.displayLat]);
+          }
           claimableIds.delete(lm.id);
         }
       });
       updateFuzzRadiusCircles();
     }
 
+    // ── Proximity notifications ──
+    function isIOSDevice() {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    }
+
+    function isInstalledPwa() {
+      return window.navigator.standalone === true ||
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.matchMedia('(display-mode: fullscreen)').matches;
+    }
+
+    function notificationsApiAvailable() {
+      return 'Notification' in window && 'serviceWorker' in navigator;
+    }
+
+    function getNotificationSupport() {
+      if (notificationsApiAvailable()) {
+        return { available: true, canPrompt: true, needsInstall: false, message: '' };
+      }
+
+      if (isIOSDevice() && !isInstalledPwa()) {
+        return {
+          available: false,
+          canPrompt: false,
+          needsInstall: true,
+          message: 'Add Unlock London to your Home Screen (Share → Add to Home Screen), then open it from there. iPhone browser tabs — including Chrome — cannot send alerts.'
+        };
+      }
+
+      if (isIOSDevice()) {
+        return {
+          available: false,
+          canPrompt: false,
+          needsInstall: false,
+          message: 'Requires iOS 16.4 or later. Then allow alerts in Settings → Notifications → Unlock London.'
+        };
+      }
+
+      return {
+        available: false,
+        canPrompt: false,
+        needsInstall: false,
+        message: 'Not supported in this browser.'
+      };
+    }
+
+    function loadNotificationPref() {
+      try {
+        notificationsEnabled = localStorage.getItem(NOTIF_KEY) === '1';
+      } catch (e) {
+        notificationsEnabled = false;
+      }
+      syncNotificationToggleUI();
+    }
+
+    function saveNotificationPref(enabled) {
+      notificationsEnabled = enabled;
+      try {
+        localStorage.setItem(NOTIF_KEY, enabled ? '1' : '0');
+      } catch (e) {}
+      syncNotificationToggleUI();
+    }
+
+    function syncNotificationToggleUI() {
+      const toggle = document.getElementById('notif-toggle');
+      const status = document.getElementById('notif-status');
+      const desc = document.getElementById('notif-desc');
+      if (!toggle) return;
+
+      const support = getNotificationSupport();
+      toggle.checked = notificationsEnabled && support.available;
+      toggle.disabled = !support.canPrompt;
+
+      if (desc && support.needsInstall) {
+        desc.textContent = 'iPhone only supports alerts for apps on your Home Screen — not regular browser tabs.';
+      }
+
+      if (!support.available) {
+        status.textContent = support.message;
+        return;
+      }
+
+      if (Notification.permission === 'denied') {
+        status.textContent = notificationsEnabled
+          ? (isIOSDevice()
+            ? 'Blocked — open Settings → Notifications → Unlock London and allow alerts.'
+            : 'Blocked — allow notifications in browser settings.')
+          : '';
+        toggle.disabled = true;
+        return;
+      }
+
+      status.textContent = notificationsEnabled
+        ? 'Switch to another app while walking to receive alerts.'
+        : '';
+    }
+
+    async function ensureNotificationPermission() {
+      if (!notificationsApiAvailable()) return false;
+      if (Notification.permission === 'granted') return true;
+      if (Notification.permission === 'denied') return false;
+      const result = await Notification.requestPermission();
+      syncNotificationToggleUI();
+      return result === 'granted';
+    }
+
+    async function showProximityNotification(lm, tier) {
+      if (!notificationsEnabled || !notificationsApiAvailable()) return;
+      if (!document.hidden) return;
+      if (Notification.permission !== 'granted') return;
+
+      const body = tier === 'claimable'
+        ? `Snap a photo to collect ${lm.name}!`
+        : `${lm.name} is nearby`;
+
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        await reg.showNotification('Unlock London', {
+          body,
+          tag: `landmark-${lm.id}-${tier}`,
+          renotify: false,
+          icon: NOTIF_ICON,
+          badge: NOTIF_ICON,
+          vibrate: tier === 'claimable' ? [40, 60, 40] : [20],
+          data: { landmarkId: lm.id, tier }
+        });
+      } catch (e) {}
+    }
+
+    function clearProximityNotificationState() {
+      notifiedNearby.clear();
+      claimableIds.clear();
+    }
+
+    function onLandmarkNearby(lm) {
+      showProximityNotification(lm, 'nearby');
+    }
+
+    async function maybePromptForNotifications() {
+      if (demoMode || !notificationsApiAvailable()) return;
+
+      let hasPref = false;
+      try {
+        hasPref = localStorage.getItem(NOTIF_KEY) !== null;
+      } catch (e) {}
+
+      if (hasPref || Notification.permission === 'denied') return;
+
+      const granted = await ensureNotificationPermission();
+      saveNotificationPref(granted);
+    }
+
+    function handleNotificationAction(landmarkId, tier) {
+      const lm = getLandmark(landmarkId);
+      if (!lm) return;
+
+      switchView('map');
+      if (tier === 'claimable' && isClaimable(lm)) {
+        startLandmarkClaim(lm);
+      } else {
+        showLandmarkModal(lm);
+      }
+    }
+
+    function handleNotificationDeepLink() {
+      const params = new URLSearchParams(location.search);
+      const landmarkId = params.get('landmark');
+      const tier = params.get('notif');
+      if (!landmarkId) return;
+
+      const cleanUrl = location.pathname + location.hash;
+      history.replaceState({}, '', cleanUrl);
+      handleNotificationAction(landmarkId, tier);
+    }
+
     // ── Claim pipeline ──
     // Landmarks in range become "claimable" — user must photo-verify to collect.
     function onLandmarkClaimable(lm) {
       if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
+      showProximityNotification(lm, 'claimable');
     }
 
     function compressClaimPhoto(file) {
@@ -856,10 +1089,13 @@
       landmark.unlocked = true;
       landmark.proofPhoto = photoUrl;
       landmark.proofResult = result;
+      clearAlertCoords(landmark);
 
       saveUnlocked(id);
       saveCollectionPhoto(id, photoUrl, result);
       restyleMarker(id);
+      notifiedNearby.delete(id);
+      claimableIds.delete(id);
       hideBottomSheet();
       pendingClaimLandmarkId = null;
       showCelebration(landmark, result);
@@ -1097,8 +1333,17 @@
 
     function renderCollection() {
       const unlockedCount = LANDMARKS.filter(l => l.unlocked).length;
+      const total = LANDMARKS.length;
+      const percent = total > 0 ? Math.round((unlockedCount / total) * 100) : 0;
+
       document.getElementById('progress-counter').textContent =
-        unlockedCount + ' / ' + LANDMARKS.length + ' collected';
+        unlockedCount + ' / ' + total + ' collected';
+      document.getElementById('progress-percent').textContent = percent + '%';
+      document.getElementById('progress-bar-fill').style.width = percent + '%';
+
+      const progressBar = document.getElementById('progress-bar');
+      progressBar.setAttribute('aria-valuenow', String(percent));
+      progressBar.setAttribute('aria-label', percent + '% of landmarks collected');
 
       if (!collectionGridApi) {
         initCollectionGrid();
@@ -1233,6 +1478,7 @@
       hasLocatedUser = true;
       applyGpsHeading(pos);
       maybeShowPhotoPrompt();
+      maybePromptForNotifications();
     }
 
     function startGeolocationWatch() {
@@ -1413,6 +1659,19 @@
     });
     document.getElementById('reset-btn').addEventListener('click', resetProgress);
     document.getElementById('collection-reset-btn').addEventListener('click', resetProgress);
+    document.getElementById('notif-toggle').addEventListener('change', async e => {
+      const want = e.target.checked;
+      if (want) {
+        const granted = await ensureNotificationPermission();
+        if (!granted) {
+          e.target.checked = false;
+          saveNotificationPref(false);
+          syncNotificationToggleUI();
+          return;
+        }
+      }
+      saveNotificationPref(want);
+    });
     document.getElementById('photo-capture-btn').addEventListener('click', openPhotoPicker);
     document.getElementById('photo-skip-btn').addEventListener('click', dismissPhotoPrompt);
     document.getElementById('photo-fab').addEventListener('click', openPhotoPicker);
@@ -1438,13 +1697,19 @@
       }
       loadUnlocked();
       loadProfilePhoto();
+      loadNotificationPref();
       initMap();
       LANDMARKS.forEach(lm => { if (lm.unlocked) restyleMarker(lm.id); });
       renderCollection();
       initGeolocation();
+      handleNotificationDeepLink();
 
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js').catch(() => {});
+        navigator.serviceWorker.addEventListener('message', e => {
+          if (e.data?.type !== 'NOTIFICATION_CLICK') return;
+          handleNotificationAction(e.data.landmarkId, e.data.tier);
+        });
       }
     }
 
