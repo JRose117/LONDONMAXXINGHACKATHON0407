@@ -22,6 +22,7 @@
     <nav class="tabs">
       <button class="tab-btn active" data-view="map">MAP</button>
       <button class="tab-btn" data-view="collection">CARDS</button>
+      <button class="tab-btn" data-view="settings">SET</button>
     </nav>
   </header>
 
@@ -46,6 +47,13 @@
       <div class="progress-counter" id="progress-counter">0 / 10 unlocked</div>
     </div>
     <div class="collection-grid" id="collection-grid"></div>
+  </div>
+
+  <div id="view-settings" class="view">
+    <div class="settings-panel">
+      <h2>SETTINGS</h2>
+      <button type="button" id="reset-btn" class="reset-btn">Reset</button>
+    </div>
   </div>
 
   <div id="bottom-sheet">
@@ -166,6 +174,24 @@
         useMemoryStorage = true;
         memoryUnlockedIds.add(id);
       }
+    }
+
+    function resetProgress() {
+      if (!confirm('Reset all unlocked landmarks? You will start from scratch.')) return;
+
+      LANDMARKS.forEach(lm => { lm.unlocked = false; });
+      memoryUnlockedIds.clear();
+
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (e) {
+        useMemoryStorage = true;
+      }
+
+      LANDMARKS.forEach(lm => restyleMarker(lm.id));
+      renderCollection();
+      hideBottomSheet();
+      hideCelebration();
     }
 
     function formatDistance(m) {
@@ -620,6 +646,7 @@
     document.getElementById('geo-enable-btn').addEventListener('click', () => {
       requestUserLocation({ centerMap: true });
     });
+    document.getElementById('reset-btn').addEventListener('click', resetProgress);
 
     // ── Boot ──
     async function boot() {
