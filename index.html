@@ -131,14 +131,6 @@
     </div>
   </div>
 
-  <svg width="0" height="0" aria-hidden="true" focusable="false">
-    <defs>
-      <clipPath id="fut-shield-clip" clipPathUnits="objectBoundingBox">
-        <path d="M 0.5 0 C 0.68 0, 0.94 0.035, 0.94 0.11 L 0.94 0.86 C 0.94 0.955, 0.68 1, 0.5 1 C 0.32 1, 0.06 0.955, 0.06 0.86 L 0.06 0.11 C 0.06 0.035, 0.32 0, 0.5 0 Z"/>
-      </clipPath>
-    </defs>
-  </svg>
-
   <div id="landmark-modal" class="landmark-modal" aria-hidden="true">
     <div class="landmark-modal-backdrop" id="landmark-modal-backdrop"></div>
     <div class="landmark-modal-card" id="landmark-modal-card" role="dialog" aria-modal="true"></div>
@@ -168,28 +160,6 @@
     const MAP_ZOOM = 17;
     const MAP_PITCH = 52;
     const MAP_STYLE = 'https://tiles.openfreemap.org/styles/positron';
-
-    const RARITY_RATING = {
-      common: 68,
-      rare: 78,
-      epic: 88,
-      legendary: 95
-    };
-
-    const CATEGORY_ABBR = {
-      'Landmarks & Monuments': 'MON',
-      'Places of Worship': 'WR',
-      'Markets & Shopping': 'MKT',
-      'Parks & Gardens': 'PRK',
-      'Theatres & Music Venues': 'THR',
-      'Historic Buildings & Palaces': 'PAL',
-      'Waterways & Public Art': 'ART',
-      'Nature Reserves & City Farms': 'NAT',
-      'Museums & Galleries': 'MUS',
-      'Sports & Leisure Venues': 'SPT'
-    };
-
-    const CARD_STATS = ['HER', 'VIS', 'ARC', 'HST', 'CUL', 'EXP'];
 
     const RARITY_COLORS = {
       common: '#9ca3af',
@@ -1191,12 +1161,7 @@
       const color = getRarityColor(landmark.rarity);
       let body = '';
 
-      if (state === 'loading') {
-        body = `
-          <p class="sheet-claim-msg">Checking your photo…</p>
-          <div class="sheet-claim-spinner" aria-hidden="true"></div>
-        `;
-      } else if (state === 'failure') {
+      if (state === 'failure') {
         const conf = result?.confidence ?? '?';
         body = `
           <p class="sheet-claim-msg sheet-claim-msg--fail">Couldn't verify this spot</p>
@@ -1251,7 +1216,7 @@
       }
 
       claimInProgress = true;
-      showClaimSheet(landmark, { state: 'loading' });
+      hideBottomSheet();
 
       try {
         let result;
@@ -1325,28 +1290,6 @@
     }
 
     // ── Celebration ──
-    function getCategoryAbbr(category) {
-      return CATEGORY_ABBR[category] || category.split(/\s+/).map(w => w[0]).join('').slice(0, 3).toUpperCase();
-    }
-
-    function getCardRating(landmark, result) {
-      const base = RARITY_RATING[landmark.rarity] || 68;
-      const conf = result?.confidence ?? 8;
-      return Math.min(99, Math.round((base + conf * 10) / 2));
-    }
-
-    function getCardStatValue(seed, index, landmark, result) {
-      const h = hashId(landmark.id + ':' + index);
-      const rarityBoost = { common: 0, rare: 6, epic: 12, legendary: 18 }[landmark.rarity] || 0;
-      const confBoost = ((result?.confidence ?? 8) - 7) * 4;
-      const base = 58 + (h % 28) + rarityBoost + confBoost;
-      return Math.min(99, Math.max(52, base));
-    }
-
-    function celebrationStatHtml(label, value) {
-      return `<div class="fut-stat"><span class="fut-stat-val">${value}</span><span class="fut-stat-lbl">${label}</span></div>`;
-    }
-
     function launchConfetti() {
       const container = document.getElementById('celebration-confetti');
       if (!container) return;
@@ -1389,20 +1332,8 @@
       const overlay = document.getElementById('celebration');
       const scene = document.getElementById('celebration-scene');
       const card = document.getElementById('celebration-card');
-      const proofResult = result || landmark.proofResult;
       const icon = POI_ICONS[landmark.id] || '📍';
-      const rating = getCardRating(landmark, proofResult);
-      const position = getCategoryAbbr(landmark.category);
-      const rarityLabel = landmark.rarity.toUpperCase().slice(0, 3);
-      const photoHtml = landmark.proofPhoto
-        ? `<img src="${landmark.proofPhoto}" alt="Your photo of ${landmark.name}">`
-        : `<div class="fut-card-photo-fallback">${icon}</div>`;
-
-      const stats = CARD_STATS.map((label, i) =>
-        celebrationStatHtml(label, getCardStatValue(landmark.id, i, landmark, proofResult))
-      );
-      const leftStats = stats.slice(0, 3).join('');
-      const rightStats = stats.slice(3).join('');
+      const color = getRarityColor(landmark.rarity);
 
       scene.style.animation = 'none';
       scene.offsetHeight;
@@ -1410,26 +1341,11 @@
 
       card.className = 'celebration-card';
       card.innerHTML = `
-        <div class="fut-card-frame rarity-${landmark.rarity}">
-          <div class="fut-card">
-            <div class="fut-card-watermark" aria-hidden="true">UL</div>
-            <div class="fut-card-crest" aria-hidden="true">
-              <span class="fut-card-crest-icon">${icon}</span>
-            </div>
-            <div class="fut-card-photo">${photoHtml}</div>
-            <div class="fut-card-meta">
-              <div class="fut-card-rating">${rating}</div>
-              <div class="fut-card-pos">${position}</div>
-              <div class="fut-card-badge fut-card-badge--cat">${icon}</div>
-              <div class="fut-card-badge fut-card-badge--rarity">${rarityLabel}</div>
-            </div>
-            <div class="fut-card-name">${landmark.name.toUpperCase()}</div>
-            <div class="fut-card-stats">
-              <div class="fut-card-stats-col">${leftStats}</div>
-              <div class="fut-card-stats-divider" aria-hidden="true"></div>
-              <div class="fut-card-stats-col">${rightStats}</div>
-            </div>
-          </div>
+        <div class="success-card rarity-${landmark.rarity}" style="--rarity-color:${color}">
+          <span class="success-card-icon">${icon}</span>
+          <p class="success-card-kicker">${inspect ? 'Collected' : 'Place collected'}</p>
+          <h3 class="success-card-title">${landmark.name}</h3>
+          <p class="success-card-desc">${landmark.flavour}</p>
         </div>
         <p class="celebration-hint">Tap to dismiss</p>
       `;
