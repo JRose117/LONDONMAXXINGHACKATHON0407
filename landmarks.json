@@ -86,5 +86,1605 @@
     "lng": -0.07491801181174133,
     "rarity": "common",
     "flavour": "A ramen restaurant in the City of London. It's a popular spot for ramen lovers."
+  },
+  {
+    "id": "camden-market",
+    "name": "Camden Market",
+    "lat": 51.5416,
+    "lng": -0.1462,
+    "rarity": "epic",
+    "flavour": "Stalls spill across the lock in a maze of leather, vinyl, and street food smoke. Punk never left Camden; it just learned to sell merchandise."
+  },
+  {
+    "id": "camden-lock",
+    "name": "Camden Lock",
+    "lat": 51.5433,
+    "lng": -0.1467,
+    "rarity": "rare",
+    "flavour": "Narrowboats rise and fall between Victorian lock gates on the Regent's Canal. Watch the towpath crowds and the water do the same slow dance."
+  },
+  {
+    "id": "the-roundhouse",
+    "name": "The Roundhouse",
+    "lat": 51.5432,
+    "lng": -0.1503,
+    "rarity": "epic",
+    "flavour": "A Victorian railway turntable shed reborn as a stage for Hendrix and The Doors. Its circular walls have hosted rebellion in every decade since."
+  },
+  {
+    "id": "primrose-hill",
+    "name": "Primrose Hill",
+    "lat": 51.5386,
+    "lng": -0.1608,
+    "rarity": "legendary",
+    "flavour": "Grass slopes climb to a single bench-lined summit with all of London laid out below. At dusk the skyline turns to silhouette and the city seems to hold its breath."
+  },
+  {
+    "id": "regents-park",
+    "name": "Regent's Park",
+    "lat": 51.5313,
+    "lng": -0.1570,
+    "rarity": "epic",
+    "flavour": "Nash's grand terraces ring a park built for a Regency prince who never quite got his palace. Rose gardens and open-air theatre fill the space where it would have stood."
+  },
+  {
+    "id": "london-zoo",
+    "name": "London Zoo",
+    "lat": 51.5353,
+    "lng": -0.1534,
+    "rarity": "epic",
+    "flavour": "The world's oldest scientific zoo has kept watch over Regent's Park since 1828. Penguins and pythons alike outlasted the Victorian curiosity that built their home."
+  },
+  {
+    "id": "kentish-town-city-farm",
+    "name": "Kentish Town City Farm",
+    "lat": 51.5490,
+    "lng": -0.1420,
+    "rarity": "common",
+    "flavour": "Goats and geese graze within earshot of the Overground. A pocket of countryside insists on surviving in the middle of the city."
+  },
+  {
+    "id": "gasholder-park",
+    "name": "Gasholder Park",
+    "lat": 51.5350,
+    "lng": -0.1246,
+    "rarity": "rare",
+    "flavour": "A Victorian gasholder's cast-iron frame now cradles a circular lawn and mirrored canopy. Industry's skeleton became one of King's Cross's quietest gardens."
+  },
+  {
+    "id": "coal-drops-yard",
+    "name": "Coal Drops Yard",
+    "lat": 51.5359,
+    "lng": -0.1257,
+    "rarity": "rare",
+    "flavour": "Two Victorian coal warehouses lean toward each other beneath a swooping steel roof. Freight once thundered through here; now it's footsteps and shopping bags."
+  },
+  {
+    "id": "british-library",
+    "name": "British Library",
+    "lat": 51.5299,
+    "lng": -0.1274,
+    "rarity": "epic",
+    "flavour": "Every book published in Britain finds a shelf somewhere in this brick fortress of knowledge. Beneath the piazza, miles of basement stacks hold centuries of paper."
+  },
+  {
+    "id": "st-pancras-old-church",
+    "name": "St Pancras Old Church",
+    "lat": 51.5324,
+    "lng": -0.1273,
+    "rarity": "rare",
+    "flavour": "One of England's oldest sites of Christian worship, older than the railway that nearly swallowed its graveyard. Thomas Hardy once catalogued its uprooted headstones by hand."
+  },
+  {
+    "id": "camley-street-natural-park",
+    "name": "Camley Street Natural Park",
+    "lat": 51.5347,
+    "lng": -0.1263,
+    "rarity": "common",
+    "flavour": "A former coal yard rewilded into wetland reeds and pond life beside the canal. Kingfishers now claim territory metres from the Eurostar line."
+  },
+  {
+    "id": "word-on-the-water",
+    "name": "Word on the Water",
+    "lat": 51.5344,
+    "lng": -0.1225,
+    "rarity": "common",
+    "flavour": "A 1920s Dutch barge stacked floor to ceiling with secondhand books, moored on the Regent's Canal. Jazz drifts from its deck on a good afternoon."
+  },
+  {
+    "id": "charles-dickens-museum",
+    "name": "Charles Dickens Museum",
+    "lat": 51.5240,
+    "lng": -0.1189,
+    "rarity": "rare",
+    "flavour": "The only surviving London home of the novelist, where he wrote Oliver Twist at his own desk. His study looks ready for him to walk back in."
+  },
+  {
+    "id": "angel-islington",
+    "name": "Angel, Islington",
+    "lat": 51.5322,
+    "lng": -0.1058,
+    "rarity": "rare",
+    "flavour": "Named for a coaching inn that once marked the edge of London itself. Now it's one square on a Monopoly board and a busy Islington crossroads."
+  },
+  {
+    "id": "camden-passage",
+    "name": "Camden Passage",
+    "lat": 51.5348,
+    "lng": -0.1046,
+    "rarity": "common",
+    "flavour": "A cobbled lane of antique dealers tucked just off Islington's Upper Street. Every Wednesday and Saturday the stalls come out and history goes on sale."
+  },
+  {
+    "id": "islington-museum",
+    "name": "Islington Museum",
+    "lat": 51.5334,
+    "lng": -0.1052,
+    "rarity": "common",
+    "flavour": "A small archive of the borough's radical past, from Chartist print shops to punk record labels. Local history rarely gets told this honestly."
+  },
+  {
+    "id": "chapel-market",
+    "name": "Chapel Market",
+    "lat": 51.5327,
+    "lng": -0.1097,
+    "rarity": "common",
+    "flavour": "Fruit and veg stalls have lined this Islington street since the 1870s. Traders still call out prices the old-fashioned way, over the traffic."
+  },
+  {
+    "id": "islington-green",
+    "name": "Islington Green",
+    "lat": 51.5359,
+    "lng": -0.1035,
+    "rarity": "common",
+    "flavour": "A sliver of park where Upper Street splits, watched over by a statue of Sir Hugh Myddelton. He built the New River that once fed the whole city."
+  },
+  {
+    "id": "sadlers-wells",
+    "name": "Sadler's Wells Theatre",
+    "lat": 51.5293,
+    "lng": -0.1097,
+    "rarity": "epic",
+    "flavour": "Dance has been staged on this site since a well of supposedly medicinal water drew Georgian crowds. Six theatres later, it's still Britain's home of contemporary movement."
+  },
+  {
+    "id": "emirates-stadium",
+    "name": "Emirates Stadium",
+    "lat": 51.5549,
+    "lng": -0.1084,
+    "rarity": "legendary",
+    "flavour": "Arsenal's cathedral of red and white rises over Holloway on matchday. Sixty thousand voices can turn Highbury's old ground into a memory and a roar."
+  },
+  {
+    "id": "highbury-fields",
+    "name": "Highbury Fields",
+    "lat": 51.5476,
+    "lng": -0.1010,
+    "rarity": "common",
+    "flavour": "Islington's largest open space once sheltered Londoners fleeing the Great Fire. Now it's lidos, plane trees, and Sunday football instead."
+  },
+  {
+    "id": "union-chapel",
+    "name": "Union Chapel",
+    "lat": 51.5495,
+    "lng": -0.0967,
+    "rarity": "rare",
+    "flavour": "A working Victorian Gothic church that doubles as one of London's finest music venues. Gigs happen beneath stained glass and a still-active pulpit."
+  },
+  {
+    "id": "almeida-theatre",
+    "name": "Almeida Theatre",
+    "lat": 51.5384,
+    "lng": -0.1027,
+    "rarity": "rare",
+    "flavour": "A former literary and scientific institute turned intimate playhouse. Some of the West End's biggest names cut their teeth on this small Islington stage."
+  },
+  {
+    "id": "regents-canal-islington",
+    "name": "Regent's Canal Towpath",
+    "lat": 51.5350,
+    "lng": -0.1050,
+    "rarity": "common",
+    "flavour": "The towpath threads from Islington Tunnel toward Camden and beyond, barges idling alongside joggers. Horses once pulled cargo along this exact stretch of water."
+  },
+  {
+    "id": "highgate-cemetery",
+    "name": "Highgate Cemetery",
+    "lat": 51.5674,
+    "lng": -0.1466,
+    "rarity": "legendary",
+    "flavour": "Gothic tombs and overgrown avenues shelter Karl Marx among 170,000 other souls. Victorian London built its grandest resting place on this quiet hill."
+  },
+  {
+    "id": "waterlow-park",
+    "name": "Waterlow Park",
+    "lat": 51.5679,
+    "lng": -0.1440,
+    "rarity": "rare",
+    "flavour": "Donated as a garden for the gardenless, its terraces climb toward views of Canary Wharf. Ponds and peacocks share the grounds with joggers and pensioners alike."
+  },
+  {
+    "id": "highgate-wood",
+    "name": "Highgate Wood",
+    "lat": 51.5747,
+    "lng": -0.1467,
+    "rarity": "common",
+    "flavour": "Ancient woodland that has stood since before London existed at all. Oaks here predate the Great Fire by centuries."
+  },
+  {
+    "id": "lauderdale-house",
+    "name": "Lauderdale House",
+    "lat": 51.5695,
+    "lng": -0.1461,
+    "rarity": "rare",
+    "flavour": "A seventeenth-century manor where Nell Gwyn is said to have once lived. It now hosts art shows in rooms that remember Restoration scandal."
+  },
+  {
+    "id": "pond-square",
+    "name": "Pond Square",
+    "lat": 51.5686,
+    "lng": -0.1467,
+    "rarity": "common",
+    "flavour": "A cobbled Highgate square where a long-drained pond once stood. Local legend insists a ghostly chicken, plucked by Francis Bacon himself, still haunts it."
+  },
+  {
+    "id": "hampstead-heath",
+    "name": "Hampstead Heath",
+    "lat": 51.5608,
+    "lng": -0.1629,
+    "rarity": "legendary",
+    "flavour": "Nearly 800 acres of wild meadow and woodland where sheep still do the council's mowing. Wild swimmers brave its ponds whatever the season."
+  },
+  {
+    "id": "kenwood-house",
+    "name": "Kenwood House",
+    "lat": 51.5721,
+    "lng": -0.1687,
+    "rarity": "epic",
+    "flavour": "A neoclassical villa on the Heath holding a Rembrandt and a Vermeer behind its white façade. Robert Adam remodelled it for an Earl who wanted London's finest view."
+  },
+  {
+    "id": "parliament-hill",
+    "name": "Parliament Hill",
+    "lat": 51.5562,
+    "lng": -0.1611,
+    "rarity": "epic",
+    "flavour": "Kite-fliers claim this Heath summit on windy days, London's skyline spread out beneath them. Legend ties its name to Gunpowder Plot conspirators watching for a fire that never came."
+  },
+  {
+    "id": "keats-house",
+    "name": "Keats House",
+    "lat": 51.5573,
+    "lng": -0.1780,
+    "rarity": "rare",
+    "flavour": "The Regency cottage where John Keats wrote Ode to a Nightingale under a plum tree. He fell in love next door and died within two years of leaving it."
+  },
+  {
+    "id": "freud-museum",
+    "name": "Freud Museum",
+    "lat": 51.5459,
+    "lng": -0.1747,
+    "rarity": "rare",
+    "flavour": "Sigmund Freud's final home, his original psychoanalytic couch still positioned exactly as he left it. He fled Vienna for this quiet Hampstead street in 1938."
+  },
+  {
+    "id": "fenton-house",
+    "name": "Fenton House",
+    "lat": 51.5606,
+    "lng": -0.1786,
+    "rarity": "rare",
+    "flavour": "A seventeenth-century merchant's house holding one of Britain's finest keyboard instrument collections. Its walled garden has bloomed above Hampstead for over three centuries."
+  },
+  {
+    "id": "burgh-house",
+    "name": "Burgh House",
+    "lat": 51.5573,
+    "lng": -0.1782,
+    "rarity": "common",
+    "flavour": "A Queen Anne house built for the physician of Hampstead's mineral spa. It now keeps the neighbourhood's local history and a very good tea room."
+  },
+  {
+    "id": "two-willow-road",
+    "name": "2 Willow Road",
+    "lat": 51.5567,
+    "lng": -0.1636,
+    "rarity": "common",
+    "flavour": "Modernist architect Ernő Goldfinger's own home, glass and concrete facing the Heath's green edge. Ian Fleming reportedly borrowed his neighbour's surname for a villain."
+  },
+  {
+    "id": "golders-hill-park",
+    "name": "Golders Hill Park",
+    "lat": 51.5691,
+    "lng": -0.1873,
+    "rarity": "common",
+    "flavour": "Deer graze and flamingos wade in this formal park at the Heath's northern edge. A walled garden and butterfly house hide just past the bandstand."
+  },
+  {
+    "id": "swiss-cottage-library",
+    "name": "Swiss Cottage Library",
+    "lat": 51.5433,
+    "lng": -0.1737,
+    "rarity": "common",
+    "flavour": "Basil Spence's curved concrete landmark has served Camden readers since the 1960s. Its sweeping lines still look like the future someone imagined decades ago."
+  },
+  {
+    "id": "hampstead-theatre",
+    "name": "Hampstead Theatre",
+    "lat": 51.5416,
+    "lng": -0.1719,
+    "rarity": "rare",
+    "flavour": "A new-writing powerhouse that has premiered work from some of Britain's sharpest playwrights. Swiss Cottage locals get first look at scripts before the West End does."
+  },
+  {
+    "id": "hampstead-ponds",
+    "name": "Hampstead Ponds",
+    "lat": 51.5605,
+    "lng": -0.1615,
+    "rarity": "rare",
+    "flavour": "Spring-fed swimming ponds where Londoners have taken the plunge since Victorian times. Ice on the surface has never quite stopped the regulars."
+  },
+  {
+    "id": "alexandra-palace",
+    "name": "Alexandra Palace",
+    "lat": 51.5941,
+    "lng": -0.1307,
+    "rarity": "legendary",
+    "flavour": "Ally Pally has burned down twice and risen twice, broadcasting the BBC's first TV signals from its mast in 1936. Its hilltop terrace still gives away the whole city for free."
+  },
+  {
+    "id": "alexandra-park",
+    "name": "Alexandra Park",
+    "lat": 51.5920,
+    "lng": -0.1280,
+    "rarity": "common",
+    "flavour": "196 acres wrap the palace in woodland, a boating lake, and a deer enclosure. On clear days the view stretches past the Shard to the North Downs."
+  },
+  {
+    "id": "muswell-hill-broadway",
+    "name": "Muswell Hill Broadway",
+    "lat": 51.5906,
+    "lng": -0.1442,
+    "rarity": "common",
+    "flavour": "Edwardian terraces curve around a broadway of independent cafes and bookshops. The area takes its name from a moss-covered well that supposedly cured the sick."
+  },
+  {
+    "id": "crouch-end-clocktower",
+    "name": "Crouch End Clocktower",
+    "lat": 51.5776,
+    "lng": -0.1219,
+    "rarity": "common",
+    "flavour": "A red-brick Victorian clocktower marks the centre of one of North London's most villagey corners. Every meeting in Crouch End seems to start here."
+  },
+  {
+    "id": "parkland-walk",
+    "name": "Parkland Walk",
+    "lat": 51.5722,
+    "lng": -0.1305,
+    "rarity": "rare",
+    "flavour": "London's longest nature reserve follows a railway line abandoned before it ever carried a passenger. Foxes and cyclists now share the old cutting."
+  },
+  {
+    "id": "spriggan-sculpture",
+    "name": "Spriggan Sculpture",
+    "lat": 51.5765,
+    "lng": -0.1327,
+    "rarity": "rare",
+    "flavour": "A crouching bronze goblin peers from a brick archway along the Parkland Walk. It has startled joggers in the dark for over three decades."
+  },
+  {
+    "id": "finsbury-park",
+    "name": "Finsbury Park",
+    "lat": 51.5648,
+    "lng": -0.1065,
+    "rarity": "common",
+    "flavour": "A Victorian pleasure ground turned festival field, boating lake, and running track. Bands and marathoners have both called it home turf."
+  },
+  {
+    "id": "wood-green-shopping-city",
+    "name": "Wood Green Shopping City",
+    "lat": 51.5972,
+    "lng": -0.1093,
+    "rarity": "common",
+    "flavour": "A sprawling indoor market hall where Haringey does its everyday shopping. Its stalls sell everything from fabric to phone cases under one long roof."
+  },
+  {
+    "id": "cherry-tree-wood",
+    "name": "Cherry Tree Wood",
+    "lat": 51.5883,
+    "lng": -0.1642,
+    "rarity": "common",
+    "flavour": "A slice of ancient woodland surviving in East Finchley, said to be a remnant of the vast Enfield Chase. A miniature railway once ran laps through its trees."
+  },
+  {
+    "id": "clissold-park",
+    "name": "Clissold Park",
+    "lat": 51.5636,
+    "lng": -0.0868,
+    "rarity": "rare",
+    "flavour": "A Georgian mansion overlooks deer paddocks and paddling ponds in the heart of Stoke Newington. Locals have picnicked on this lawn since Victorian times."
+  },
+  {
+    "id": "abney-park-cemetery",
+    "name": "Abney Park Cemetery",
+    "lat": 51.5636,
+    "lng": -0.0759,
+    "rarity": "epic",
+    "flavour": "A nonconformist Victorian burial ground turned overgrown nature reserve, its chapel now roofless and ivy-clad. Salvation Army founder William Booth rests somewhere among the wild tangle."
+  },
+  {
+    "id": "stoke-newington-church-street",
+    "name": "Stoke Newington Church Street",
+    "lat": 51.5622,
+    "lng": -0.0778,
+    "rarity": "common",
+    "flavour": "Independent bookshops and bakeries line a street that's kept its village feel despite the city closing in. Two churches, old and new, still bookend it."
+  },
+  {
+    "id": "castle-climbing-centre",
+    "name": "Castle Climbing Centre",
+    "lat": 51.5697,
+    "lng": -0.0871,
+    "rarity": "rare",
+    "flavour": "A mock-medieval Victorian pumping station turned indoor climbing wall. Its battlements once guarded reservoirs, not chalk bags and harnesses."
+  },
+  {
+    "id": "dalston-curve-garden",
+    "name": "Dalston Curve Garden",
+    "lat": 51.5471,
+    "lng": -0.0754,
+    "rarity": "common",
+    "flavour": "A community garden grown on a disused curve of Victorian railway. Fairy lights and a wood-fired oven turn it magical after dark."
+  },
+  {
+    "id": "ridley-road-market",
+    "name": "Ridley Road Market",
+    "lat": 51.5479,
+    "lng": -0.0724,
+    "rarity": "rare",
+    "flavour": "A street market trading since the 1880s, its stalls a running record of every community that has called Dalston home. Fabric, fish, and fresh spices compete for the same pavement."
+  },
+  {
+    "id": "arcola-theatre",
+    "name": "Arcola Theatre",
+    "lat": 51.5470,
+    "lng": -0.0757,
+    "rarity": "common",
+    "flavour": "A converted paint factory turned one of East London's boldest fringe theatres. New writing and reworked classics both find a stage here."
+  },
+  {
+    "id": "springfield-park",
+    "name": "Springfield Park",
+    "lat": 51.5666,
+    "lng": -0.0489,
+    "rarity": "rare",
+    "flavour": "A hillside park overlooking the River Lee, its slopes a favourite for picnics with a view. A Victorian mansion at its edge now serves tea instead of hosting garden parties."
+  },
+  {
+    "id": "millfields-park",
+    "name": "Millfields Park",
+    "lat": 51.5590,
+    "lng": -0.0455,
+    "rarity": "common",
+    "flavour": "A long riverside green running beside the Lee Navigation in Clapton. Cricket pitches and towpath cyclists share the same stretch of grass."
+  },
+  {
+    "id": "clapton-pond",
+    "name": "Clapton Pond",
+    "lat": 51.5586,
+    "lng": -0.0532,
+    "rarity": "common",
+    "flavour": "One of Hackney's last surviving ponds, fenced and fringed with willows on a busy road. Ducks have held their ground here since long before the traffic arrived."
+  },
+  {
+    "id": "hackney-empire",
+    "name": "Hackney Empire",
+    "lat": 51.5453,
+    "lng": -0.0553,
+    "rarity": "epic",
+    "flavour": "A gilded Edwardian music hall where Charlie Chaplin once performed as a boy. It still hosts pantomime, comedy, and everything loud in between."
+  },
+  {
+    "id": "sutton-house",
+    "name": "Sutton House",
+    "lat": 51.5473,
+    "lng": -0.0538,
+    "rarity": "rare",
+    "flavour": "Hackney's oldest residential building, a red-brick Tudor merchant's house that has survived squatters, subdivisions, and centuries of change. Its original wood panelling still lines the halls."
+  },
+  {
+    "id": "hackney-city-farm",
+    "name": "Hackney City Farm",
+    "lat": 51.5344,
+    "lng": -0.0645,
+    "rarity": "common",
+    "flavour": "Pigs and chickens live out their days a short walk from Broadway Market. A working farm insists on existing in the middle of the borough."
+  },
+  {
+    "id": "broadway-market",
+    "name": "Broadway Market",
+    "lat": 51.5364,
+    "lng": -0.0592,
+    "rarity": "rare",
+    "flavour": "A Victorian street market revived from decline into one of East London's food and vintage hotspots. Saturdays turn the whole road into one long queue."
+  },
+  {
+    "id": "london-fields",
+    "name": "London Fields",
+    "lat": 51.5401,
+    "lng": -0.0596,
+    "rarity": "epic",
+    "flavour": "Common land grazed since medieval times, now home to a lido, cricket pitch, and endless summer picnics. Hackney's green heart has never stopped being used exactly as intended."
+  },
+  {
+    "id": "victoria-park",
+    "name": "Victoria Park",
+    "lat": 51.5361,
+    "lng": -0.0389,
+    "rarity": "legendary",
+    "flavour": "East London's first public park, built after a petition of 30,000 signatures demanded green space for the poor. Chartists and suffragettes both once rallied on its grass."
+  },
+  {
+    "id": "hackney-marshes",
+    "name": "Hackney Marshes",
+    "lat": 51.5568,
+    "lng": -0.0384,
+    "rarity": "common",
+    "flavour": "Rows of football pitches stretch across reclaimed marshland beside the River Lee. Sunday league dreams have been made and broken here for generations."
+  },
+  {
+    "id": "bruce-castle-museum",
+    "name": "Bruce Castle Museum",
+    "lat": 51.5949,
+    "lng": -0.0699,
+    "rarity": "epic",
+    "flavour": "A Tudor manor turned Haringey's local history museum, said to be haunted by a wife who fell to her death from its tower. Rowland Hill once ran an experimental school within these walls."
+  },
+  {
+    "id": "tottenham-hotspur-stadium",
+    "name": "Tottenham Hotspur Stadium",
+    "lat": 51.6043,
+    "lng": -0.0664,
+    "rarity": "legendary",
+    "flavour": "A glass-and-steel giant with the world's first dividing retractable pitch, built to host football and NFL alike. Sixty-two thousand fans can shake the ground on a European night."
+  },
+  {
+    "id": "markfield-park",
+    "name": "Markfield Park",
+    "lat": 51.5934,
+    "lng": -0.0665,
+    "rarity": "rare",
+    "flavour": "A restored Victorian beam engine still turns inside this Tottenham park, once used to pump the borough's sewage. It's one of the last of its kind still in working order."
+  },
+  {
+    "id": "downhills-park",
+    "name": "Downhills Park",
+    "lat": 51.5878,
+    "lng": -0.0776,
+    "rarity": "common",
+    "flavour": "A quiet green space in Tottenham with tennis courts and a paddling pool. Its name recalls the hills that once rolled here before the streets did."
+  },
+  {
+    "id": "seven-sisters-market",
+    "name": "Pueblito Paisa Market",
+    "lat": 51.5828,
+    "lng": -0.0733,
+    "rarity": "rare",
+    "flavour": "A Latin American indoor market tucked beneath Seven Sisters, its stalls thick with the smell of arepas and plantain. Colombia and Ecuador feel closer here than the Victoria line does."
+  },
+  {
+    "id": "walthamstow-wetlands",
+    "name": "Walthamstow Wetlands",
+    "lat": 51.5824,
+    "lng": -0.0499,
+    "rarity": "epic",
+    "flavour": "Europe's largest urban wetland reserve, its Victorian reservoirs still supplying London's drinking water. Herons and cormorants have claimed the banks the engineers built."
+  },
+  {
+    "id": "walthamstow-village",
+    "name": "Walthamstow Village",
+    "lat": 51.5860,
+    "lng": -0.0186,
+    "rarity": "common",
+    "flavour": "Weatherboarded cottages and a medieval church survive around Orford Road's cobbles. It's the oldest corner of a borough that grew up fast around it."
+  },
+  {
+    "id": "william-morris-gallery",
+    "name": "William Morris Gallery",
+    "lat": 51.5852,
+    "lng": -0.0177,
+    "rarity": "epic",
+    "flavour": "The childhood home of the Arts and Crafts designer, his wallpaper patterns still climbing the walls he once lived within. Water Lilies frame a Georgian house turned museum."
+  },
+  {
+    "id": "vestry-house-museum",
+    "name": "Vestry House Museum",
+    "lat": 51.5859,
+    "lng": -0.0173,
+    "rarity": "common",
+    "flavour": "A former workhouse turned local history museum on the edge of Walthamstow Village. Its collection includes one of Britain's earliest surviving petrol cars."
+  },
+  {
+    "id": "lloyd-park",
+    "name": "Lloyd Park",
+    "lat": 51.5838,
+    "lng": -0.0180,
+    "rarity": "common",
+    "flavour": "A Walthamstow green space named for the family who once owned its grand house next door. Skate ramps and a splash pad now share the grounds with quiet flower beds."
+  },
+  {
+    "id": "epping-forest-chingford",
+    "name": "Epping Forest",
+    "lat": 51.6280,
+    "lng": 0.0050,
+    "rarity": "legendary",
+    "flavour": "Six thousand acres of ancient woodland, saved from enclosure by a nineteenth-century public outcry. Queen Victoria declared it open to the people forever, and it still is."
+  },
+  {
+    "id": "queen-elizabeths-hunting-lodge",
+    "name": "Queen Elizabeth's Hunting Lodge",
+    "lat": 51.6293,
+    "lng": -0.0079,
+    "rarity": "rare",
+    "flavour": "A timber-framed Tudor grandstand built for Henry VIII to watch the hunt without dismounting. Elizabeth I is said to have ridden her horse straight up its stairs."
+  },
+  {
+    "id": "blackhorse-beer-mile",
+    "name": "Blackhorse Beer Mile",
+    "lat": 51.5850,
+    "lng": -0.0430,
+    "rarity": "rare",
+    "flavour": "Eight breweries share a stretch of industrial units along Blackhorse Road. What was once warehouse space now smells permanently of hops."
+  },
+  {
+    "id": "enfield-town-park",
+    "name": "Enfield Town Park",
+    "lat": 51.6521,
+    "lng": -0.0824,
+    "rarity": "common",
+    "flavour": "A New River loop winds through the middle of this Victorian town park. Bandstand concerts still draw a crowd on summer weekends."
+  },
+  {
+    "id": "forty-hall",
+    "name": "Forty Hall",
+    "lat": 51.6693,
+    "lng": -0.0669,
+    "rarity": "epic",
+    "flavour": "A Jacobean mansion built for a Lord Mayor of London, its parkland now home to a working vineyard. Enfield's grandest house has outlasted every family that ever owned it."
+  },
+  {
+    "id": "myddelton-house-gardens",
+    "name": "Myddelton House Gardens",
+    "lat": 51.6656,
+    "lng": -0.0577,
+    "rarity": "rare",
+    "flavour": "The eccentric plant collections of Edwardian gardener E.A. Bowles fill these grounds beside the New River. He once grew a bed devoted entirely to plants he called 'lunatics'."
+  },
+  {
+    "id": "trent-park",
+    "name": "Trent Park",
+    "lat": 51.6503,
+    "lng": -0.1319,
+    "rarity": "epic",
+    "flavour": "A former royal hunting ground that secretly held captured German generals during the Second World War, their bugged conversations recorded from the walls. Ancient woodland now hides that history in plain sight."
+  },
+  {
+    "id": "whitewebbs-park",
+    "name": "Whitewebbs Park",
+    "lat": 51.6717,
+    "lng": -0.0787,
+    "rarity": "common",
+    "flavour": "Woodland and a disused Victorian pumping station sit at the edge of Enfield, said to have once sheltered Gunpowder Plot conspirators. Dog walkers now cover the same quiet paths."
+  },
+  {
+    "id": "southgate-town-hall",
+    "name": "Southgate Town Hall",
+    "lat": 51.6321,
+    "lng": -0.1281,
+    "rarity": "common",
+    "flavour": "An Art Deco landmark built in the 1930s when Southgate imagined itself London's next great suburb. Its clean white lines still stand out against the surrounding streets."
+  },
+  {
+    "id": "broomfield-park",
+    "name": "Broomfield Park",
+    "lat": 51.6202,
+    "lng": -0.1136,
+    "rarity": "common",
+    "flavour": "The burnt-out shell of a Jacobean mansion stands ivy-wrapped at the centre of this Palmers Green park. Its lake and walled garden survived the fire that the house did not."
+  },
+  {
+    "id": "barnet-museum",
+    "name": "Barnet Museum",
+    "lat": 51.6503,
+    "lng": -0.1998,
+    "rarity": "common",
+    "flavour": "A small local museum steps from the site of the Battle of Barnet, a decisive clash in the Wars of the Roses. Fog is said to have decided the fighting as much as swords did."
+  },
+  {
+    "id": "queens-wood",
+    "name": "Queen's Wood",
+    "lat": 51.5779,
+    "lng": -0.1428,
+    "rarity": "common",
+    "flavour": "Ancient woodland neighbouring Highgate Wood, left largely unmanaged and wilder for it. Fungi thrive here in numbers rare for inner London."
+  },
+  {
+    "id": "clissold-house",
+    "name": "Clissold House",
+    "lat": 51.5636,
+    "lng": -0.0868,
+    "rarity": "common",
+    "flavour": "The Georgian mansion at the centre of Clissold Park once belonged to a local vicar's daughter and her Quaker husband. It's now a café where none of that history feels far away."
+  },
+  {
+    "id": "new-river-head",
+    "name": "New River Head",
+    "lat": 51.5293,
+    "lng": -0.1088,
+    "rarity": "common",
+    "flavour": "The terminus of a hand-dug seventeenth-century aqueduct that once carried fresh water forty miles into the city. London's first great infrastructure project ends quietly here in Islington."
+  },
+  {
+    "id": "whittington-stone",
+    "name": "Whittington Stone",
+    "lat": 51.5638,
+    "lng": -0.1378,
+    "rarity": "rare",
+    "flavour": "A stone marks the spot where Dick Whittington supposedly heard Bow Bells call him back to become Lord Mayor. A bronze cat sits watchfully on top, just in case the story's true."
+  },
+  {
+    "id": "gillespie-park",
+    "name": "Gillespie Park",
+    "lat": 51.5580,
+    "lng": -0.1074,
+    "rarity": "common",
+    "flavour": "A nature reserve built on abandoned railway sidings behind Arsenal's old ground. Wildflowers and newts reclaimed the tracks long before anyone planned it that way."
+  },
+  {
+    "id": "new-river-walk-canonbury",
+    "name": "New River Walk",
+    "lat": 51.5470,
+    "lng": -0.1010,
+    "rarity": "common",
+    "flavour": "A linear garden follows the old course of the New River through Canonbury. Herons occasionally drop in, unaware the water hasn't flowed here in decades."
+  },
+  {
+    "id": "canonbury-tower",
+    "name": "Canonbury Tower",
+    "lat": 51.5450,
+    "lng": -0.0995,
+    "rarity": "rare",
+    "flavour": "A Tudor tower that once belonged to the Priory of St Bartholomew, later home to Francis Bacon and Oliver Goldsmith. It still rises oddly over Islington's terraced streets."
+  },
+  {
+    "id": "bunhill-fields",
+    "name": "Bunhill Fields",
+    "lat": 51.5252,
+    "lng": -0.0894,
+    "rarity": "epic",
+    "flavour": "A nonconformist burial ground holding William Blake, Daniel Defoe, and John Bunyan within a few hundred feet of each other. Office workers now eat lunch among headstones three centuries old."
+  },
+  {
+    "id": "clerkenwell-green",
+    "name": "Clerkenwell Green",
+    "lat": 51.5230,
+    "lng": -0.1055,
+    "rarity": "rare",
+    "flavour": "Lenin once studied in a building on this square, now the Marx Memorial Library. Radical printing presses have called this patch of London home since the Chartists."
+  },
+  {
+    "id": "screen-on-the-green",
+    "name": "Screen on the Green",
+    "lat": 51.5364,
+    "lng": -0.1032,
+    "rarity": "common",
+    "flavour": "One of Britain's oldest working cinemas, its Georgian frontage barely changed since the silent era. The Sex Pistols played their first-ever gig practically next door."
+  },
+  {
+    "id": "estorick-collection",
+    "name": "Estorick Collection",
+    "lat": 51.5480,
+    "lng": -0.1024,
+    "rarity": "rare",
+    "flavour": "A Georgian townhouse in Canonbury holds Britain's finest collection of Italian Futurist art. Speed and machinery fill quiet rooms that predate both by two centuries."
+  },
+  {
+    "id": "wembley-stadium",
+    "name": "Wembley Stadium",
+    "lat": 51.5560,
+    "lng": -0.2795,
+    "rarity": "legendary",
+    "flavour": "The arch rises 133 metres over a stadium built on the bones of a national obsession. Cup finals and reunion gigs alike have made grown adults weep beneath it."
+  },
+  {
+    "id": "london-designer-outlet",
+    "name": "London Designer Outlet",
+    "lat": 51.5598,
+    "lng": -0.2817,
+    "rarity": "common",
+    "flavour": "Seventy discounted brands sit in the shadow of Wembley's arch. Match days turn its cafes into a sea of replica shirts."
+  },
+  {
+    "id": "ovo-arena-wembley",
+    "name": "OVO Arena Wembley",
+    "lat": 51.5557,
+    "lng": -0.2823,
+    "rarity": "epic",
+    "flavour": "One of Britain's great music venues, hosting everyone from Bowie to breakdancing world championships. Its curved Art Deco frontage has watched Wembley change around it for a century."
+  },
+  {
+    "id": "kensal-green-cemetery",
+    "name": "Kensal Green Cemetery",
+    "lat": 51.5296,
+    "lng": -0.2249,
+    "rarity": "epic",
+    "flavour": "London's first great Victorian cemetery, its 72 acres holding Brunel and Thackeray beneath crumbling classical monuments. It set the template every London cemetery that followed would copy."
+  },
+  {
+    "id": "kiln-theatre",
+    "name": "Kiln Theatre",
+    "lat": 51.5386,
+    "lng": -0.1938,
+    "rarity": "rare",
+    "flavour": "A Kilburn stage built on giving voice to stories the West End overlooked. Decades of socially engaged theatre have made it a genuine local institution."
+  },
+  {
+    "id": "welsh-harp-reservoir",
+    "name": "Welsh Harp Reservoir",
+    "lat": 51.5626,
+    "lng": -0.2409,
+    "rarity": "rare",
+    "flavour": "A Victorian reservoir named for a long-gone pub, now a sailing club's home between Wembley and Hendon. Herons work its reedy edges undisturbed by the North Circular nearby."
+  },
+  {
+    "id": "gladstone-park",
+    "name": "Gladstone Park",
+    "lat": 51.5563,
+    "lng": -0.2411,
+    "rarity": "common",
+    "flavour": "Once the grounds of a house the Prime Minister loved to visit, now Brent's favourite green space. His name stuck to the park long after the house began to crumble."
+  },
+  {
+    "id": "roundwood-park",
+    "name": "Roundwood Park",
+    "lat": 51.5453,
+    "lng": -0.2437,
+    "rarity": "common",
+    "flavour": "A Victorian public park with a bandstand, a walled garden, and the quiet confidence of somewhere that's never needed to change much. Willesden locals have picnicked here for well over a century."
+  },
+  {
+    "id": "queens-park-nw",
+    "name": "Queen's Park",
+    "lat": 51.5347,
+    "lng": -0.2038,
+    "rarity": "common",
+    "flavour": "Laid out on the site of an 1879 agricultural show by the same man who designed Epping Forest's paths. Its figure-of-eight walkways still loop past the same formal flower beds."
+  },
+  {
+    "id": "willesden-green-library",
+    "name": "Willesden Green Library Centre",
+    "lat": 51.5478,
+    "lng": -0.2226,
+    "rarity": "common",
+    "flavour": "A Grade II-listed building holding a library, gallery, and community space under one Brent roof. It's been the neighbourhood's living room for generations."
+  },
+  {
+    "id": "raf-museum-london",
+    "name": "RAF Museum London",
+    "lat": 51.5952,
+    "lng": -0.2453,
+    "rarity": "epic",
+    "flavour": "Spitfires and Lancasters hang under one roof on the site of the old Hendon Aerodrome. A century of British aviation history sits parked where pilots once actually took off."
+  },
+  {
+    "id": "brent-cross-shopping-centre",
+    "name": "Brent Cross Shopping Centre",
+    "lat": 51.5765,
+    "lng": -0.2258,
+    "rarity": "common",
+    "flavour": "One of Britain's first American-style shopping malls, opened in 1976 to a curious and delighted North London. Half a century later it's still the local answer to a rainy Saturday."
+  },
+  {
+    "id": "st-johns-wood-church",
+    "name": "St John's Wood Church",
+    "lat": 51.5334,
+    "lng": -0.1743,
+    "rarity": "common",
+    "flavour": "A Regency church that gave the whole neighbourhood its name and its village calm. Its churchyard garden is a quiet pocket just off the Wood's busy high street."
+  },
+  {
+    "id": "lords-cricket-ground",
+    "name": "Lord's Cricket Ground",
+    "lat": 51.5299,
+    "lng": -0.1723,
+    "rarity": "legendary",
+    "flavour": "The self-declared home of cricket, its famous urn and honours boards guarded like scripture. The sport's oldest rivalries are still settled on this exact patch of grass."
+  },
+  {
+    "id": "abbey-road-crossing",
+    "name": "Abbey Road Crossing",
+    "lat": 51.5320,
+    "lng": -0.1774,
+    "rarity": "legendary",
+    "flavour": "A plain zebra crossing turned global pilgrimage site by four Beatles and one album cover. Traffic still waits patiently for tourists to get their shot."
+  },
+  {
+    "id": "harrow-on-the-hill",
+    "name": "Harrow on the Hill",
+    "lat": 51.5797,
+    "lng": -0.3368,
+    "rarity": "epic",
+    "flavour": "A hilltop village of cobbled lanes and one of England's oldest schools, largely unchanged since the eighteenth century. Byron carved his name into a schoolroom desk that's still on display."
+  },
+  {
+    "id": "harrow-school",
+    "name": "Harrow School",
+    "lat": 51.5786,
+    "lng": -0.3363,
+    "rarity": "rare",
+    "flavour": "Founded in 1572 under a royal charter from Elizabeth I, its boys still wear straw boaters through the village streets. Seven British Prime Ministers passed through these gates as students."
+  },
+  {
+    "id": "wembley-sunday-market",
+    "name": "Wembley Sunday Market",
+    "lat": 51.5560,
+    "lng": -0.2860,
+    "rarity": "common",
+    "flavour": "England's largest Sunday market fills a stadium car park with over 500 stalls. Bargain hunters arrive before the football fans ever do."
+  },
+  {
+    "id": "cricklewood-broadway",
+    "name": "Cricklewood Broadway",
+    "lat": 51.5528,
+    "lng": -0.2126,
+    "rarity": "common",
+    "flavour": "A multicultural high street wedged between Camden and Brent, its shopfronts a running tally of every community that's settled here. Victorian railway terraces still line the streets behind it."
+  },
+  {
+    "id": "little-venice",
+    "name": "Little Venice",
+    "lat": 51.5217,
+    "lng": -0.1809,
+    "rarity": "rare",
+    "flavour": "Colourful narrowboats crowd the junction where the Regent's Canal meets the Grand Union. Robert Browning is credited with giving this quiet basin its romantic name."
+  },
+  {
+    "id": "maida-vale-studios",
+    "name": "Maida Vale Studios",
+    "lat": 51.5285,
+    "lng": -0.1859,
+    "rarity": "epic",
+    "flavour": "A BBC recording studio behind an unassuming brick façade, host to decades of legendary live radio sessions. Bowie, Hendrix, and half of British rock history have played inside these walls."
+  },
+  {
+    "id": "paddington-recreation-ground",
+    "name": "Paddington Recreation Ground",
+    "lat": 51.5347,
+    "lng": -0.1930,
+    "rarity": "common",
+    "flavour": "A Victorian sports ground where a young Sherlock Holmes creator, Arthur Conan Doyle, once played cricket. Athletics tracks and bowling greens still fill it on weekend mornings."
+  },
+  {
+    "id": "neasden-temple",
+    "name": "BAPS Shri Swaminarayan Mandir",
+    "lat": 51.5535,
+    "lng": -0.2705,
+    "rarity": "legendary",
+    "flavour": "Europe's largest Hindu temple, hand-carved from Italian and Indian stone and assembled without structural steel. It rises impossibly ornate above the suburban rooftops of Neasden."
+  },
+  {
+    "id": "monken-hadley-common",
+    "name": "Monken Hadley Common",
+    "lat": 51.6580,
+    "lng": -0.1789,
+    "rarity": "common",
+    "flavour": "Ancient common land on London's northern fringe, its medieval church tower once used as a beacon site. Barnet's edge still feels like open countryside here."
+  },
+  {
+    "id": "hendon-park",
+    "name": "Hendon Park",
+    "lat": 51.5847,
+    "lng": -0.2270,
+    "rarity": "common",
+    "flavour": "A war memorial garden and formal lawns mark the centre of this North West London suburb. Sunday football and quiet remembrance share the same grass."
+  },
+  {
+    "id": "tower-of-london",
+    "name": "Tower of London",
+    "lat": 51.5081,
+    "lng": -0.0759,
+    "rarity": "legendary",
+    "flavour": "Nearly a thousand years of royal palace, prison, and fortress guard the Crown Jewels behind Norman walls. Ravens are kept here on the belief that their departure would bring the kingdom down."
+  },
+  {
+    "id": "brick-lane",
+    "name": "Brick Lane",
+    "lat": 51.5225,
+    "lng": -0.0716,
+    "rarity": "epic",
+    "flavour": "Curry houses and bagel shops trace centuries of Huguenot, Jewish, and Bangladeshi settlement on one East End street. Street art now covers the brick that gave the lane its name."
+  },
+  {
+    "id": "columbia-road-flower-market",
+    "name": "Columbia Road Flower Market",
+    "lat": 51.5297,
+    "lng": -0.0716,
+    "rarity": "rare",
+    "flavour": "A Sunday-only explosion of colour between Shoreditch and Bethnal Green, ten-foot banana trees jostling with £1 bedding plants. Traders' cockney calls have echoed down this street since Victorian times."
+  },
+  {
+    "id": "old-spitalfields-market",
+    "name": "Old Spitalfields Market",
+    "lat": 51.5194,
+    "lng": -0.0755,
+    "rarity": "epic",
+    "flavour": "A Victorian iron-and-glass market hall that's fed London traders since the seventeenth century. Fashion, food, and antiques now fill stalls where fruit and veg once ruled."
+  },
+  {
+    "id": "whitechapel-gallery",
+    "name": "Whitechapel Gallery",
+    "lat": 51.5155,
+    "lng": -0.0714,
+    "rarity": "rare",
+    "flavour": "A century-old gallery that once hung Picasso's Guernica for a East End audience unused to seeing masterpieces up close. Free contemporary art shows still carry that same democratic spirit."
+  },
+  {
+    "id": "whitechapel-market",
+    "name": "Whitechapel Market",
+    "lat": 51.5171,
+    "lng": -0.0637,
+    "rarity": "common",
+    "flavour": "Trading since 1904, its stalls of fabric, spice, and fresh fish outlasting fashions and fires alike. The East End still does its everyday shopping exactly where it always has."
+  },
+  {
+    "id": "museum-of-childhood",
+    "name": "Young V&A",
+    "lat": 51.5286,
+    "lng": -0.0663,
+    "rarity": "epic",
+    "flavour": "A cast-iron Victorian hall in Bethnal Green holds a century and a half of dolls, dollhouses, and toys. Reopened and reimagined, it's still a museum built entirely around childhood wonder."
+  },
+  {
+    "id": "wiltons-music-hall",
+    "name": "Wilton's Music Hall",
+    "lat": 51.5107,
+    "lng": -0.0629,
+    "rarity": "epic",
+    "flavour": "The oldest grand music hall left on earth, its shabby-chic interior barely patched since Victorian times. Cabaret, magic, and puppetry still fill a room built for exactly that."
+  },
+  {
+    "id": "queen-elizabeth-olympic-park",
+    "name": "Queen Elizabeth Olympic Park",
+    "lat": 51.5493,
+    "lng": -0.0163,
+    "rarity": "legendary",
+    "flavour": "Built for the 2012 Games, its waterways and stadiums now belong to the neighbourhood rather than the world's athletes. Stratford's biggest transformation left the whole city a park to show for it."
+  },
+  {
+    "id": "arcelormittal-orbit",
+    "name": "ArcelorMittal Orbit",
+    "lat": 51.5385,
+    "lng": -0.0090,
+    "rarity": "legendary",
+    "flavour": "Britain's largest piece of public art twists 115 metres above the Olympic Park, part sculpture, part slide. Anish Kapoor built London a landmark with no obvious use except awe."
+  },
+  {
+    "id": "westfield-stratford-city",
+    "name": "Westfield Stratford City",
+    "lat": 51.5433,
+    "lng": -0.0083,
+    "rarity": "common",
+    "flavour": "Europe's largest urban shopping centre grew up alongside the Olympic Park it borders. Escalators here move more people on a Saturday than most towns see in a week."
+  },
+  {
+    "id": "london-stadium",
+    "name": "London Stadium",
+    "lat": 51.5386,
+    "lng": -0.0166,
+    "rarity": "epic",
+    "flavour": "Built to host the 2012 Olympics, now home to West Ham's roaring claret and blue. Athletics world records and football chants have both echoed off the same curved roof."
+  },
+  {
+    "id": "museum-of-london-docklands",
+    "name": "Museum of London Docklands",
+    "lat": 51.5077,
+    "lng": -0.0198,
+    "rarity": "rare",
+    "flavour": "A two-hundred-year-old sugar warehouse now tells the story of the river trade that built East London. Its exhibits don't shy from the darker cargo those docks once carried too."
+  },
+  {
+    "id": "canary-wharf",
+    "name": "Canary Wharf",
+    "lat": 51.5054,
+    "lng": -0.0235,
+    "rarity": "epic",
+    "flavour": "Glass towers rose from abandoned docklands in the 1990s to become London's second financial city. Ninety thousand people now work where cargo ships once unloaded."
+  },
+  {
+    "id": "emirates-air-line",
+    "name": "Emirates Air Line",
+    "lat": 51.5030,
+    "lng": 0.0050,
+    "rarity": "rare",
+    "flavour": "London's only cable car glides over the Thames between Greenwich Peninsula and the Royal Docks. Built for the Olympics, it's quietly become one of the city's strangest commutes."
+  },
+  {
+    "id": "mile-end-park",
+    "name": "Mile End Park",
+    "lat": 51.5273,
+    "lng": -0.0335,
+    "rarity": "common",
+    "flavour": "A green corridor stitched together from Blitz-damaged land along the Regent's Canal. A green bridge now carries the park clean over a busy East London road."
+  },
+  {
+    "id": "st-katharine-docks",
+    "name": "St Katharine Docks",
+    "lat": 51.5077,
+    "lng": -0.0722,
+    "rarity": "rare",
+    "flavour": "Superyachts now moor where merchant ships once queued beside the Tower of London. A whole medieval parish was demolished in 1828 to dig the basin they float in."
+  },
+  {
+    "id": "wapping-old-stairs",
+    "name": "Wapping Old Stairs",
+    "lat": 51.5052,
+    "lng": -0.0563,
+    "rarity": "common",
+    "flavour": "Ancient river stairs once used by press gangs and smugglers to slip between ship and shore. The Thames still slaps against the same worn steps at low tide."
+  },
+  {
+    "id": "royal-london-hospital-museum",
+    "name": "Royal London Hospital Museum",
+    "lat": 51.5177,
+    "lng": -0.0605,
+    "rarity": "common",
+    "flavour": "Housed in a crypt beneath a working East End hospital, its exhibits trace Jack the Ripper's victims and Joseph Merrick's life in unflinching detail. Medicine's stranger history lives in the basement here."
+  },
+  {
+    "id": "stepney-city-farm",
+    "name": "Stepney City Farm",
+    "lat": 51.5178,
+    "lng": -0.0466,
+    "rarity": "common",
+    "flavour": "Pigs, bees, and a wood-fired pizza oven share a plot behind Stepney's terraced streets. It's one of several working farms East London insists on keeping."
+  },
+  {
+    "id": "spitalfields-city-farm",
+    "name": "Spitalfields City Farm",
+    "lat": 51.5219,
+    "lng": -0.0621,
+    "rarity": "common",
+    "flavour": "A pocket of goats and chickens squeezed between railway lines and housing blocks. Kids here learn where eggs come from a five-minute walk from Brick Lane's curry houses."
+  },
+  {
+    "id": "bow-quarter",
+    "name": "Bow Quarter",
+    "lat": 51.5285,
+    "lng": -0.0245,
+    "rarity": "rare",
+    "flavour": "The old Bryant and May match factory, site of the 1888 matchgirls' strike that helped birth the British trade union movement. Its Victorian clock tower now overlooks converted flats instead of factory floors."
+  },
+  {
+    "id": "three-mills-island",
+    "name": "Three Mills Island",
+    "lat": 51.5271,
+    "lng": -0.0080,
+    "rarity": "epic",
+    "flavour": "Tide mills have ground grain on this spot since the Domesday Book was written. The House Mill still standing here is the largest of its kind left in the world."
+  },
+  {
+    "id": "leytonstone-hitchcock-mosaics",
+    "name": "Leytonstone Hitchcock Mosaics",
+    "lat": 51.5674,
+    "lng": 0.0088,
+    "rarity": "common",
+    "flavour": "Tiled portraits from Alfred Hitchcock's films line the tube station in the East London suburb where he was born. Commuters walk past The Birds and Psycho on their way to the platform."
+  },
+  {
+    "id": "valentines-park",
+    "name": "Valentines Park",
+    "lat": 51.5729,
+    "lng": 0.0776,
+    "rarity": "common",
+    "flavour": "A Georgian mansion's grounds turned public park, complete with a walled garden and boating lake. Ilford's green heart has barely changed shape since Victorian times."
+  },
+  {
+    "id": "tate-modern",
+    "name": "Tate Modern",
+    "lat": 51.5076,
+    "lng": -0.0994,
+    "rarity": "legendary",
+    "flavour": "A disused power station's turbine hall now dwarfs visitors beneath rotating installation art. Bankside's chimney has become as recognisable a landmark as anything it once powered past."
+  },
+  {
+    "id": "the-shard",
+    "name": "The Shard",
+    "lat": 51.5045,
+    "lng": -0.0865,
+    "rarity": "legendary",
+    "flavour": "Western Europe's tallest building splinters into the sky above London Bridge station. Its viewing platform trades vertigo for a view that stretches forty miles on a clear day."
+  },
+  {
+    "id": "london-eye",
+    "name": "London Eye",
+    "lat": 51.5033,
+    "lng": -0.1195,
+    "rarity": "legendary",
+    "flavour": "Built as a temporary millennium attraction, this giant wheel became too popular to ever take down. Each capsule takes thirty minutes to circle above the Thames and back."
+  },
+  {
+    "id": "imperial-war-museum",
+    "name": "Imperial War Museum",
+    "lat": 51.4963,
+    "lng": -0.1097,
+    "rarity": "epic",
+    "flavour": "Two naval guns flank the entrance to a museum housed in a former hospital for the mentally ill. Its Holocaust galleries are among the most sobering rooms in London."
+  },
+  {
+    "id": "southbank-centre",
+    "name": "Southbank Centre",
+    "lat": 51.5055,
+    "lng": -0.1147,
+    "rarity": "epic",
+    "flavour": "Brutalist concrete terraces built for the 1951 Festival of Britain still host the city's densest cluster of concert halls. Skateboarders have claimed the undercroft as their own for decades."
+  },
+  {
+    "id": "london-dungeon",
+    "name": "The London Dungeon",
+    "lat": 51.5033,
+    "lng": -0.1179,
+    "rarity": "rare",
+    "flavour": "Plague, torture, and Jack the Ripper get the theatrical treatment beneath County Hall. Actors leap from the shadows so you don't have to imagine the history yourself."
+  },
+  {
+    "id": "sea-life-london-aquarium",
+    "name": "SEA LIFE London Aquarium",
+    "lat": 51.5015,
+    "lng": -0.1195,
+    "rarity": "rare",
+    "flavour": "Sharks and rays circle beneath the former seat of London's government inside County Hall. A million visitors a year come face to face with the deep beside the Thames."
+  },
+  {
+    "id": "oval-cricket-ground",
+    "name": "The Oval",
+    "lat": 51.4837,
+    "lng": -0.1166,
+    "rarity": "epic",
+    "flavour": "England's first Test match ground, its gasholders once a permanent backdrop to Ashes deciders. Kennington has hosted cricket history since 1845."
+  },
+  {
+    "id": "battersea-power-station",
+    "name": "Battersea Power Station",
+    "lat": 51.4816,
+    "lng": -0.1445,
+    "rarity": "legendary",
+    "flavour": "Four white chimneys made famous by a floating pig on a Pink Floyd album cover. Decades of dereliction ended in a glass-and-brick rebirth as shops and flats."
+  },
+  {
+    "id": "battersea-park",
+    "name": "Battersea Park",
+    "lat": 51.4791,
+    "lng": -0.1587,
+    "rarity": "rare",
+    "flavour": "A Victorian pleasure garden built on reclaimed marshland opposite Chelsea. Its Peace Pagoda was raised by Buddhist monks as a gift to a city that had seen too much war."
+  },
+  {
+    "id": "brixton-market",
+    "name": "Brixton Village",
+    "lat": 51.4626,
+    "lng": -0.1163,
+    "rarity": "epic",
+    "flavour": "Trains thunder overhead while stallholders serve jerk chicken and Caribbean patties beneath a covered Victorian arcade. Brixton's food and its history share the same roof here."
+  },
+  {
+    "id": "david-bowie-mural-brixton",
+    "name": "David Bowie Mural",
+    "lat": 51.4657,
+    "lng": -0.1174,
+    "rarity": "rare",
+    "flavour": "A shrine outside the shop where Bowie once bought his sweets, still covered in flowers and handwritten tributes. His home borough never stopped claiming him as its own."
+  },
+  {
+    "id": "brixton-windmill",
+    "name": "Brixton Windmill",
+    "lat": 51.4557,
+    "lng": -0.1204,
+    "rarity": "rare",
+    "flavour": "A working Victorian windmill from 1816, restored and turning again after a long industrial slumber. Its sails once ground flour for a Brixton that was still open countryside."
+  },
+  {
+    "id": "electric-avenue-brixton",
+    "name": "Electric Avenue",
+    "lat": 51.4629,
+    "lng": -0.1149,
+    "rarity": "common",
+    "flavour": "One of the first London streets lit by electricity, later immortalised in an Eddy Grant hit. Market stalls still crowd its length exactly as they did a century ago."
+  },
+  {
+    "id": "clapham-common",
+    "name": "Clapham Common",
+    "lat": 51.4618,
+    "lng": -0.1466,
+    "rarity": "epic",
+    "flavour": "220 acres of open grass hosting everything from Sunday football to summer music festivals. South London's biggest lung sits right where four busy roads collide."
+  },
+  {
+    "id": "clapham-old-town",
+    "name": "Clapham Old Town",
+    "lat": 51.4650,
+    "lng": -0.1382,
+    "rarity": "common",
+    "flavour": "A pocket of Georgian houses and pubs that predates the Victorian terraces surrounding it. Clapham's oldest corner still feels like a village that got swallowed by the city."
+  },
+  {
+    "id": "brockwell-park",
+    "name": "Brockwell Park",
+    "lat": 51.4514,
+    "lng": -0.1032,
+    "rarity": "rare",
+    "flavour": "A Georgian mansion overlooks a walled garden, a lido, and one of the best skyline views in South London. Herne Hill's green heart earns every one of its sloping acres."
+  },
+  {
+    "id": "brockwell-lido",
+    "name": "Brockwell Lido",
+    "lat": 51.4498,
+    "lng": -0.1038,
+    "rarity": "common",
+    "flavour": "An Art Deco outdoor pool that's been drawing summer swimmers since 1937. Heated water and cold British weather make an odd but beloved combination here."
+  },
+  {
+    "id": "dulwich-picture-gallery",
+    "name": "Dulwich Picture Gallery",
+    "lat": 51.4432,
+    "lng": -0.0857,
+    "rarity": "epic",
+    "flavour": "England's oldest public art gallery, designed by Sir John Soane and opened in 1817. Old Masters hang in golden top-lit rooms built specifically to flatter them."
+  },
+  {
+    "id": "dulwich-park",
+    "name": "Dulwich Park",
+    "lat": 51.4437,
+    "lng": -0.0813,
+    "rarity": "common",
+    "flavour": "Boating lakes and cherry blossom avenues fill this quiet corner of South East London. Queen Mary reportedly loved it so much she visited twice in one week."
+  },
+  {
+    "id": "horniman-museum",
+    "name": "Horniman Museum",
+    "lat": 51.4386,
+    "lng": -0.0653,
+    "rarity": "epic",
+    "flavour": "A tea merchant's Victorian curiosity collection grew into a museum of taxidermy, music, and world culture. Its famously overstuffed walrus has confused visitors for well over a century."
+  },
+  {
+    "id": "crystal-palace-park",
+    "name": "Crystal Palace Park",
+    "lat": 51.4185,
+    "lng": -0.0708,
+    "rarity": "legendary",
+    "flavour": "Life-sized Victorian dinosaur sculptures still stalk an island lake here, built decades before anyone knew what dinosaurs really looked like. The glass palace they were built to accompany burned down in 1936."
+  },
+  {
+    "id": "peckham-rye-park",
+    "name": "Peckham Rye Park",
+    "lat": 51.4645,
+    "lng": -0.0680,
+    "rarity": "common",
+    "flavour": "William Blake reportedly saw a tree full of angels here as a child. The park has stayed a source of local wonder ever since, angels or not."
+  },
+  {
+    "id": "bussey-building-rooftop",
+    "name": "Bussey Building Rooftop",
+    "lat": 51.4693,
+    "lng": -0.0656,
+    "rarity": "rare",
+    "flavour": "A former cricket bat factory's roof now hosts one of South London's best sunset views. Peckham's skyline looks entirely different from up here than it does from the street."
+  },
+  {
+    "id": "nunhead-cemetery",
+    "name": "Nunhead Cemetery",
+    "lat": 51.4622,
+    "lng": -0.0563,
+    "rarity": "epic",
+    "flavour": "One of London's 'Magnificent Seven' Victorian cemeteries, its Gothic chapel now a roofless ruin swallowed by trees. Few visitors realise how wild a graveyard can get once nature takes over."
+  },
+  {
+    "id": "greenwich-park",
+    "name": "Greenwich Park",
+    "lat": 51.4769,
+    "lng": -0.0005,
+    "rarity": "legendary",
+    "flavour": "London's oldest royal park straddles the Prime Meridian, one foot in each hemisphere. Henry VIII was born within sight of its hilltop views."
+  },
+  {
+    "id": "royal-observatory-greenwich",
+    "name": "Royal Observatory Greenwich",
+    "lat": 51.4769,
+    "lng": 0.0005,
+    "rarity": "legendary",
+    "flavour": "The world agreed to measure time and longitude from this exact hilltop in 1884. A red time ball still drops from its roof every day at 1pm, just as it has since 1833."
+  },
+  {
+    "id": "cutty-sark",
+    "name": "Cutty Sark",
+    "lat": 51.4826,
+    "lng": -0.0097,
+    "rarity": "epic",
+    "flavour": "The last surviving tea clipper of its kind, dry-docked and raised on stilts in Greenwich. It once raced other ships home from China with cargo that couldn't wait."
+  },
+  {
+    "id": "greenwich-market",
+    "name": "Greenwich Market",
+    "lat": 51.4816,
+    "lng": -0.0107,
+    "rarity": "rare",
+    "flavour": "Craft stalls and street food fill a covered Georgian market square beside the maritime museums. Sailors once traded here; now it's vintage clothes and vinyl."
+  },
+  {
+    "id": "national-maritime-museum",
+    "name": "National Maritime Museum",
+    "lat": 51.4809,
+    "lng": -0.0054,
+    "rarity": "epic",
+    "flavour": "The world's largest maritime museum tells Britain's naval story through the very uniform Nelson wore when he died at Trafalgar. Empire and exploration both sail through these galleries."
+  },
+  {
+    "id": "queens-house-greenwich",
+    "name": "Queen's House",
+    "lat": 51.4816,
+    "lng": -0.0000,
+    "rarity": "rare",
+    "flavour": "England's first classical building, designed by Inigo Jones for a queen who died before it was finished. Its Tulip Stairs spiral upward with no central support at all."
+  },
+  {
+    "id": "eltham-palace",
+    "name": "Eltham Palace",
+    "lat": 51.4457,
+    "lng": 0.0538,
+    "rarity": "epic",
+    "flavour": "A medieval royal residence grafted onto a 1930s Art Deco mansion, the two styles colliding under one roof. Henry VIII spent much of his childhood in the great hall that still stands here."
+  },
+  {
+    "id": "wimbledon-lawn-tennis-museum",
+    "name": "Wimbledon Lawn Tennis Museum",
+    "lat": 51.4344,
+    "lng": -0.2145,
+    "rarity": "epic",
+    "flavour": "Centre Court's history is kept just steps from where it's actually made every summer. A hologram of John McEnroe still relives his most furious line calls on demand."
+  },
+  {
+    "id": "wimbledon-common",
+    "name": "Wimbledon Common",
+    "lat": 51.4372,
+    "lng": -0.2313,
+    "rarity": "rare",
+    "flavour": "A windmill built in 1817 still stands on common land that inspired the Wombles. Golfers, dog walkers, and joggers share nearly 460 acres of unmanicured green."
+  },
+  {
+    "id": "kew-gardens",
+    "name": "Kew Gardens",
+    "lat": 51.4787,
+    "lng": -0.2953,
+    "rarity": "legendary",
+    "flavour": "A UNESCO World Heritage Site holding the world's largest collection of living plants under Victorian glasshouses. Its seed bank quietly safeguards species that might not exist anywhere else."
+  },
+  {
+    "id": "richmond-park",
+    "name": "Richmond Park",
+    "lat": 51.4425,
+    "lng": -0.2745,
+    "rarity": "legendary",
+    "flavour": "London's largest royal park, home to 630 free-roaming deer descended from Henry VIII's hunting stock. A protected sightline from a hilltop here still frames St Paul's dome, ten miles away."
+  },
+  {
+    "id": "ham-house",
+    "name": "Ham House",
+    "lat": 51.4390,
+    "lng": -0.2965,
+    "rarity": "rare",
+    "flavour": "One of the most complete surviving Stuart houses in Europe, its interiors barely altered since the 1670s. National Trust visitors walk through rooms that look ready for a Restoration court to return."
+  },
+  {
+    "id": "hampton-court-palace",
+    "name": "Hampton Court Palace",
+    "lat": 51.4033,
+    "lng": -0.3363,
+    "rarity": "legendary",
+    "flavour": "Henry VIII's favourite palace still holds a working Tudor kitchen and a famous maze that's swallowed visitors since 1690. Six of his wives passed through these grounds, one way or another."
+  },
+  {
+    "id": "fairfield-halls-croydon",
+    "name": "Fairfield Halls",
+    "lat": 51.3746,
+    "lng": -0.0997,
+    "rarity": "common",
+    "flavour": "Croydon's arts and conference centre has hosted concerts and comedy since 1962. Its concert hall has quietly seen more famous names pass through than the town gets credit for."
+  },
+  {
+    "id": "brit-school-croydon",
+    "name": "The BRIT School",
+    "lat": 51.3672,
+    "lng": -0.1002,
+    "rarity": "common",
+    "flavour": "A free performing arts school that's produced Adele, Amy Winehouse, and a disproportionate share of British pop. Croydon quietly trains the voices the charts later can't stop playing."
+  },
+  {
+    "id": "croydon-clocktower",
+    "name": "Croydon Clocktower",
+    "lat": 51.3757,
+    "lng": -0.0982,
+    "rarity": "common",
+    "flavour": "A Victorian town hall complex now holding a museum, library, and theatre under one clock-topped roof. Croydon's civic pride has centred here since 1896."
+  },
+  {
+    "id": "streatham-common",
+    "name": "Streatham Common",
+    "lat": 51.4258,
+    "lng": -0.1338,
+    "rarity": "common",
+    "flavour": "Open parkland rising toward a hidden Rookery garden, once the grounds of a mineral spa that drew Georgian visitors. South London still comes here for exactly the same fresh air."
+  },
+  {
+    "id": "tooting-bec-lido",
+    "name": "Tooting Bec Lido",
+    "lat": 51.4356,
+    "lng": -0.1600,
+    "rarity": "rare",
+    "flavour": "One of the largest freshwater swimming pools in Europe, its Edwardian beach huts painted in bright stripes. Wild swimmers brave it year-round, ice or not."
+  },
+  {
+    "id": "tooting-market",
+    "name": "Tooting Market",
+    "lat": 51.4267,
+    "lng": -0.1682,
+    "rarity": "common",
+    "flavour": "A covered Edwardian arcade turned into one of South London's best food and curry destinations. Its narrow aisles pack in more cuisines than streets three times the size."
+  },
+  {
+    "id": "bermondsey-street",
+    "name": "Bermondsey Street",
+    "lat": 51.4996,
+    "lng": -0.0824,
+    "rarity": "common",
+    "flavour": "A leather-trade backstreet turned gallery and gastropub strip in the shadow of the Shard. Its Victorian warehouses now hold art instead of hides."
+  },
+  {
+    "id": "maltby-street-market",
+    "name": "Maltby Street Market",
+    "lat": 51.4986,
+    "lng": -0.0771,
+    "rarity": "rare",
+    "flavour": "Railway arches near Bermondsey hide one of London's best-loved weekend food markets. It grew almost by accident from the overflow of its more famous neighbour, Borough Market."
+  },
+  {
+    "id": "deptford-market-yard",
+    "name": "Deptford Market Yard",
+    "lat": 51.4780,
+    "lng": -0.0264,
+    "rarity": "common",
+    "flavour": "Converted railway arches beside Deptford station now hold street food stalls and independent shops. Henry VIII once built warships nearby; now it's flat whites and vinyl records."
+  },
+  {
+    "id": "vauxhall-city-farm",
+    "name": "Vauxhall City Farm",
+    "lat": 51.4870,
+    "lng": -0.1233,
+    "rarity": "common",
+    "flavour": "Sheep and shire horses graze within sight of the MI6 building across the river. A working farm has insisted on surviving in Vauxhall since the 1970s."
+  },
+  {
+    "id": "herne-hill-velodrome",
+    "name": "Herne Hill Velodrome",
+    "lat": 51.4535,
+    "lng": -0.1005,
+    "rarity": "rare",
+    "flavour": "The only surviving track from the 1948 London Olympics, still hosting cycling clubs on the exact bends riders raced then. Herne Hill kept pedalling long after the crowds went home."
+  },
+  {
+    "id": "sydenham-hill-wood",
+    "name": "Sydenham Hill Wood",
+    "lat": 51.4340,
+    "lng": -0.0680,
+    "rarity": "rare",
+    "flavour": "One of the last surviving fragments of the ancient Great North Wood that once stretched to Croydon. A ruined Victorian folly bridge still stands hidden among its trees."
   }
 ]
