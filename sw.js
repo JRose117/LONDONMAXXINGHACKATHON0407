@@ -1,12 +1,15 @@
-const CACHE_NAME = 'unlock-london-v4';
+const CACHE_NAME = 'unlock-london-v12';
 const SHELL = [
   './',
   './index.html',
   './style.css',
   './landmarks.json',
   './manifest.json',
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+  'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css',
+  'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js',
+  'https://cdn.jsdelivr.net/npm/ag-grid-community@32.3.3/styles/ag-grid.min.css',
+  'https://cdn.jsdelivr.net/npm/ag-grid-community@32.3.3/styles/ag-theme-alpine.min.css',
+  'https://cdn.jsdelivr.net/npm/ag-grid-community@32.3.3/dist/ag-grid-community.min.js',
   'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap'
 ];
 
@@ -24,10 +27,29 @@ self.addEventListener('activate', event => {
   );
 });
 
+// Network-first for our own app files so code changes always show up.
+// Cache-first for third-party CDN assets (rarely change, good offline).
 self.addEventListener('fetch', event => {
+  const req = event.request;
+  if (req.method !== 'GET') return;
+
+  const url = new URL(req.url);
+  const isSameOrigin = url.origin === self.location.origin;
+
+  if (isSameOrigin) {
+    event.respondWith(
+      fetch(req)
+        .then(res => {
+          const copy = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
+          return res;
+        })
+        .catch(() => caches.match(req).then(cached => cached || caches.match('./index.html')))
+    );
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      return cached || fetch(event.request).catch(() => cached);
-    })
+    caches.match(req).then(cached => cached || fetch(req))
   );
 });

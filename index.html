@@ -9,20 +9,22 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" crossorigin="">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@32.3.3/styles/ag-grid.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@32.3.3/styles/ag-theme-alpine.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
-    <div class="header-title" id="header-title">
-      UNLOCK LONDON
-      <span class="subtitle">heritage discovery</span>
+    <div class="header-brand" id="header-title">
+      <span class="header-name">Unlock London</span>
+      <span class="header-tagline">Heritage discovery</span>
     </div>
-    <div class="demo-badge" id="demo-badge">DEMO</div>
-    <nav class="tabs">
-      <button class="tab-btn active" data-view="map">MAP</button>
-      <button class="tab-btn" data-view="collection">CARDS</button>
-      <button class="tab-btn" data-view="settings">SET</button>
+    <div class="demo-badge" id="demo-badge">Demo</div>
+    <nav class="tabs" aria-label="Main navigation">
+      <button class="tab-btn active" data-view="map">Map</button>
+      <button class="tab-btn" data-view="collection">Collection</button>
+      <button class="tab-btn" data-view="settings">Settings</button>
     </nav>
   </header>
 
@@ -31,6 +33,7 @@
   <div id="view-map" class="view active">
     <div class="map-stage">
       <div id="map"></div>
+      <div class="map-horizon"></div>
       <div class="map-vignette"></div>
       <div class="map-scan"></div>
       <div id="geo-prompt" class="geo-prompt visible">
@@ -38,21 +41,39 @@
         <button type="button" id="geo-enable-btn" class="geo-enable-btn">ENABLE LOCATION</button>
         <p class="geo-prompt-hint" id="geo-prompt-hint"></p>
       </div>
+      <div id="photo-prompt" class="photo-prompt">
+        <p class="photo-prompt-text">Add a profile photo</p>
+        <p class="photo-prompt-hint">It appears above your pin on the map.</p>
+        <button type="button" id="photo-capture-btn" class="photo-capture-btn">Take photo</button>
+        <button type="button" id="photo-skip-btn" class="photo-skip-btn">Skip for now</button>
+      </div>
+      <input type="file" id="photo-input" accept="image/*" capture="user" hidden>
     </div>
   </div>
 
   <div id="view-collection" class="view">
     <div class="collection-header">
-      <h2>YOUR COLLECTION</h2>
+      <h2>Collection</h2>
       <div class="progress-counter" id="progress-counter">0 / 10 unlocked</div>
     </div>
-    <div class="collection-grid" id="collection-grid"></div>
+    <div id="collection-grid" class="ag-theme-alpine-dark collection-grid"></div>
   </div>
 
   <div id="view-settings" class="view">
     <div class="settings-panel">
-      <h2>SETTINGS</h2>
-      <button type="button" id="reset-btn" class="reset-btn">Reset</button>
+      <div class="settings-header">
+        <h2>Settings</h2>
+        <p class="settings-subtitle">Manage your profile and progress</p>
+      </div>
+      <section class="settings-section">
+        <h3 class="settings-section-title">Profile</h3>
+        <button type="button" id="change-photo-btn" class="settings-btn">Change profile photo</button>
+      </section>
+      <section class="settings-section settings-section--danger">
+        <h3 class="settings-section-title">Landmarks</h3>
+        <p class="settings-section-desc">Clear all unlocked landmarks and start your collection from scratch.</p>
+        <button type="button" id="reset-btn" class="settings-btn settings-btn--danger">Reset all landmarks</button>
+      </section>
     </div>
   </div>
 
@@ -68,14 +89,26 @@
     </div>
   </div>
 
+  <div id="landmark-modal" class="landmark-modal" aria-hidden="true">
+    <div class="landmark-modal-backdrop" id="landmark-modal-backdrop"></div>
+    <div class="landmark-modal-card" id="landmark-modal-card" role="dialog" aria-modal="true"></div>
+  </div>
+
   <button id="debug-btn" title="Toggle demo mode">DBG</button>
   <button id="teleport-btn">Teleport to next locked landmark</button>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" crossorigin=""></script>
+  <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@32.3.3/dist/ag-grid-community.min.js"></script>
   <script>
     // ── Constants ──
     const STORAGE_KEY = 'unlock-london:v1';
+    const PROFILE_KEY = 'unlock-london:profile';
     const UNLOCK_RADIUS_M = 100;
+    const FUZZ_MIN_M = 55;
+    const FUZZ_MAX_M = 165;
+    const MAP_ZOOM = 17;
+    const MAP_PITCH = 52;
+    const MAP_STYLE = 'https://tiles.openfreemap.org/styles/positron';
 
     const RARITY_COLORS = {
       common: '#9ca3af',
@@ -111,11 +144,13 @@
 
     let map = null;
     let userMarker = null;
-    let userIcon = null;
-    let unlockCircle = null;
+    let profilePhotoUrl = null;
+    let userHeading = null;
+    let orientationHandler = null;
     const markersById = {};
     let geoWatchId = null;
     let hasLocatedUser = false;
+    let collectionGridApi = null;
 
     // ── Helpers ──
     function getRarityColor(rarity) {
@@ -136,11 +171,42 @@
       return LANDMARKS.find(l => l.id === id);
     }
 
+    function hashId(str) {
+      let h = 2166136261;
+      for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return h >>> 0;
+    }
+
+    function offsetCoords(lat, lng, distanceM, angleDeg) {
+      const angle = angleDeg * Math.PI / 180;
+      const earthR = 6371000;
+      const dLat = (distanceM * Math.cos(angle)) / earthR * (180 / Math.PI);
+      const dLng = (distanceM * Math.sin(angle)) / (earthR * Math.cos(lat * Math.PI / 180)) * (180 / Math.PI);
+      return { lat: lat + dLat, lng: lng + dLng };
+    }
+
+    function applyLocationFuzz(lm) {
+      const h = hashId(lm.id);
+      const angle = (h % 3600) / 10;
+      const t = ((h >>> 8) % 1000) / 1000;
+      const distanceM = FUZZ_MIN_M + t * (FUZZ_MAX_M - FUZZ_MIN_M);
+      const offset = offsetCoords(lm.lat, lm.lng, distanceM, angle);
+      return { ...lm, displayLat: offset.lat, displayLng: offset.lng };
+    }
+
+    function getMarkerCoords(lm) {
+      if (lm.unlocked) return { lat: lm.lat, lng: lm.lng };
+      return { lat: lm.displayLat, lng: lm.displayLng };
+    }
+
     async function loadLandmarks() {
       const res = await fetch('./landmarks.json');
       if (!res.ok) throw new Error('Failed to load landmarks');
       const data = await res.json();
-      LANDMARKS = data.map(lm => ({ ...lm, unlocked: false }));
+      LANDMARKS = data.map(lm => applyLocationFuzz({ ...lm, unlocked: false }));
     }
 
     function loadUnlocked() {
@@ -191,12 +257,22 @@
       LANDMARKS.forEach(lm => restyleMarker(lm.id));
       renderCollection();
       hideBottomSheet();
+      hideLandmarkModal();
       hideCelebration();
     }
 
     function formatDistance(m) {
       if (m < 1000) return Math.round(m) + 'm';
       return (m / 1000).toFixed(1) + 'km';
+    }
+
+    function formatFuzzyDistance(m) {
+      if (m < 120) return 'Very close — keep exploring';
+      if (m < 250) return 'Somewhere nearby';
+      if (m < 500) return 'Not far';
+      if (m < 1000) return 'A short walk away';
+      if (m < 2500) return 'Further out';
+      return 'A way to go';
     }
 
     // ── Marker styling ──
@@ -206,7 +282,7 @@
       return marker.getElement()?.querySelector('.poi-pin');
     }
 
-    function createLandmarkIcon(landmark) {
+    function landmarkMarkerHtml(landmark) {
       const cls = landmark.unlocked ? 'unlocked' : 'locked';
       const color = getRarityColor(landmark.rarity);
       const icon = POI_ICONS[landmark.id] || '📍';
@@ -218,21 +294,220 @@
         ? `<div class="poi-glow" style="background:${color}"></div>`
         : '';
 
-      return L.divIcon({
-        className: 'poi-marker-wrap',
-        html: `
-          <div class="poi-pin ${cls}" style="--ring-color:${color}">
-            ${glowHtml}
-            <div class="poi-ring"></div>
-            <div class="poi-shadow"></div>
-            <div class="poi-stem"></div>
-            <div class="poi-disc-wrap">
-              <div class="poi-disc" style="background:${discBg}">${displayIcon}</div>
-            </div>
+      return `
+        <div class="poi-pin ${cls}" style="--ring-color:${color}">
+          ${glowHtml}
+          <div class="poi-ring"></div>
+          <div class="poi-shadow"></div>
+          <div class="poi-stem"></div>
+          <div class="poi-disc-wrap">
+            <div class="poi-disc" style="background:${discBg}">${displayIcon}</div>
           </div>
-        `,
-        iconSize: [44, 64],
-        iconAnchor: [22, 58]
+        </div>
+      `;
+    }
+
+    function createLandmarkMarker(landmark) {
+      const el = document.createElement('div');
+      el.className = 'poi-marker-wrap';
+      el.innerHTML = landmarkMarkerHtml(landmark);
+      el.addEventListener('click', e => {
+        e.stopPropagation();
+        showBottomSheet(landmark);
+      });
+
+      const coords = getMarkerCoords(landmark);
+
+      return new maplibregl.Marker({ element: el, anchor: 'bottom' })
+        .setLngLat([coords.lng, coords.lat])
+        .addTo(map);
+    }
+
+    function createUserMarkerEl() {
+      const el = document.createElement('div');
+      el.className = 'user-marker-wrap';
+      el.innerHTML = userMarkerHtml();
+      return el;
+    }
+
+    function userMarkerHtml() {
+      const photoInner = profilePhotoUrl
+        ? `<img src="${profilePhotoUrl}" alt="Your profile">`
+        : '';
+
+      return `
+        <div class="user-beacon">
+          <div class="user-beacon-heading">
+            <div class="user-beacon-beam"></div>
+          </div>
+          <div class="user-beacon-photo${profilePhotoUrl ? '' : ' user-beacon-photo--empty'}">
+            ${photoInner}
+          </div>
+          <div class="user-beacon-ring"></div>
+          <div class="user-beacon-ring"></div>
+          <div class="user-beacon-shadow"></div>
+          <div class="user-beacon-avatar"></div>
+        </div>
+      `;
+    }
+
+    function updateHeadingArrow(heading) {
+      if (heading == null || isNaN(heading)) return;
+
+      userHeading = heading;
+      const el = userMarker?.getElement()?.querySelector('.user-beacon-heading');
+      if (!el) return;
+
+      const bearing = map ? map.getBearing() : 0;
+      el.style.transform = `translateX(-50%) rotate(${heading - bearing}deg)`;
+      el.classList.add('visible');
+    }
+
+    function getCompassHeading(event) {
+      if (event.webkitCompassHeading != null && !isNaN(event.webkitCompassHeading)) {
+        return event.webkitCompassHeading;
+      }
+      if (event.absolute && event.alpha != null && !isNaN(event.alpha)) {
+        return (360 - event.alpha) % 360;
+      }
+      return null;
+    }
+
+    function startOrientationTracking() {
+      if (orientationHandler || !window.DeviceOrientationEvent) return;
+
+      orientationHandler = event => {
+        const heading = getCompassHeading(event);
+        if (heading != null) updateHeadingArrow(heading);
+      };
+
+      window.addEventListener('deviceorientation', orientationHandler, true);
+    }
+
+    async function requestOrientationAccess() {
+      if (!window.DeviceOrientationEvent) return;
+
+      try {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+          const result = await DeviceOrientationEvent.requestPermission();
+          if (result === 'granted') startOrientationTracking();
+        } else {
+          startOrientationTracking();
+        }
+      } catch (e) {}
+    }
+
+    function applyGpsHeading(pos) {
+      const { heading, speed } = pos.coords;
+      if (heading != null && !isNaN(heading) && speed != null && speed > 0.8) {
+        updateHeadingArrow(heading);
+      }
+    }
+
+    function refreshUserMarker() {
+      if (!userMarker) return;
+      userMarker.getElement().innerHTML = userMarkerHtml();
+      if (userHeading != null) updateHeadingArrow(userHeading);
+    }
+
+    function loadProfilePhoto() {
+      try {
+        profilePhotoUrl = localStorage.getItem(PROFILE_KEY);
+      } catch (e) {
+        profilePhotoUrl = null;
+      }
+    }
+
+    function saveProfilePhoto(dataUrl) {
+      profilePhotoUrl = dataUrl;
+      try {
+        localStorage.setItem(PROFILE_KEY, dataUrl);
+      } catch (e) {
+        // Storage full — still show photo this session
+      }
+      refreshUserMarker();
+    }
+
+    function compressProfilePhoto(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = e => {
+          const img = new Image();
+          img.onerror = reject;
+          img.onload = () => {
+            const size = 128;
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const min = Math.min(img.width, img.height);
+            const sx = (img.width - min) / 2;
+            const sy = (img.height - min) / 2;
+            ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+            resolve(canvas.toDataURL('image/jpeg', 0.85));
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function showPhotoPrompt() {
+      if (profilePhotoUrl) return;
+      document.getElementById('photo-prompt').classList.add('visible');
+    }
+
+    function hidePhotoPrompt() {
+      document.getElementById('photo-prompt').classList.remove('visible');
+    }
+
+    function openPhotoPicker() {
+      document.getElementById('photo-input').click();
+    }
+
+    async function handlePhotoSelected(file) {
+      if (!file || !file.type.startsWith('image/')) return;
+
+      try {
+        const dataUrl = await compressProfilePhoto(file);
+        saveProfilePhoto(dataUrl);
+        hidePhotoPrompt();
+      } catch (e) {
+        alert('Could not use that photo — try another image.');
+      }
+    }
+
+    function maybeShowPhotoPrompt() {
+      if (!profilePhotoUrl && hasLocatedUser && !demoMode) {
+        showPhotoPrompt();
+      }
+    }
+
+    function circlePolygon(lat, lng, radiusM, points = 64) {
+      const coords = [];
+      const earthR = 6371000;
+      for (let i = 0; i <= points; i++) {
+        const angle = (i / points) * 2 * Math.PI;
+        const dx = radiusM * Math.cos(angle);
+        const dy = radiusM * Math.sin(angle);
+        const dLat = (dy / earthR) * (180 / Math.PI);
+        const dLng = (dx / (earthR * Math.cos((lat * Math.PI) / 180))) * (180 / Math.PI);
+        coords.push([lng + dLng, lat + dLat]);
+      }
+      return {
+        type: 'Feature',
+        geometry: { type: 'Polygon', coordinates: [coords] }
+      };
+    }
+
+    function flyToUser(lat, lng) {
+      if (!map) return;
+      map.easeTo({
+        center: [lng, lat],
+        zoom: Math.max(map.getZoom(), MAP_ZOOM),
+        pitch: MAP_PITCH,
+        duration: 900
       });
     }
 
@@ -240,26 +515,27 @@
       const landmark = getLandmark(id);
       const marker = markersById[id];
       if (!landmark || !marker) return;
-      marker.setIcon(createLandmarkIcon(landmark));
+      const el = marker.getElement();
+      el.innerHTML = landmarkMarkerHtml(landmark);
+      const coords = getMarkerCoords(landmark);
+      marker.setLngLat([coords.lng, coords.lat]);
       updateMarkerProximity();
     }
 
     function updateUnlockCircle(lat, lng) {
       if (!map) return;
-      if (!unlockCircle) {
-        unlockCircle = L.circle([lat, lng], {
-          radius: UNLOCK_RADIUS_M,
-          color: '#4ade80',
-          fillColor: '#22c55e',
-          fillOpacity: 0.1,
-          weight: 2,
-          opacity: 0.55,
-          className: 'unlock-radius-circle'
-        }).addTo(map);
-        unlockCircle.bringToBack();
-      } else {
-        unlockCircle.setLatLng([lat, lng]);
-      }
+
+      const apply = () => {
+        const source = map.getSource('unlock-radius');
+        if (!source) return;
+        source.setData({
+          type: 'FeatureCollection',
+          features: [circlePolygon(lat, lng, UNLOCK_RADIUS_M)]
+        });
+      };
+
+      if (map.isStyleLoaded()) apply();
+      else map.once('load', apply);
     }
 
     function updateMarkerProximity() {
@@ -301,19 +577,23 @@
     function updateUserPosition(lat, lng, { centerMap = false } = {}) {
       userPos = { lat, lng };
 
-      if (!userMarker && map && userIcon) {
-        userMarker = L.marker([lat, lng], { icon: userIcon, zIndexOffset: 1000 }).addTo(map);
+      if (!userMarker && map) {
+        userMarker = new maplibregl.Marker({ element: createUserMarkerEl(), anchor: 'bottom' })
+          .setLngLat([lng, lat])
+          .addTo(map);
       } else if (userMarker) {
-        userMarker.setLatLng([lat, lng]);
+        userMarker.setLngLat([lng, lat]);
       }
 
       updateUnlockCircle(lat, lng);
       updateMarkerProximity();
       checkUnlocks();
 
-      if (centerMap && map) {
-        map.setView([lat, lng], Math.max(map.getZoom(), 15));
+      if (currentView === 'collection' && collectionGridApi) {
+        collectionGridApi.setGridOption('rowData', getCollectionRowData());
       }
+
+      if (centerMap) flyToUser(lat, lng);
     }
 
     // ── Celebration ──
@@ -366,12 +646,12 @@
         let distText = '—';
         if (userPos) {
           const dist = haversine(userPos.lat, userPos.lng, landmark.lat, landmark.lng);
-          distText = formatDistance(dist) + ' away';
+          distText = formatFuzzyDistance(dist);
         }
         html += `
           <div class="sheet-poi-icon">?</div>
           <div class="card-name">${landmark.name}</div>
-          <p class="sheet-locked-msg">??? — get closer to unlock</p>
+          <p class="sheet-locked-msg">??? — explore the area to unlock</p>
           <div class="sheet-distance">${distText}</div>
         `;
       }
@@ -385,41 +665,136 @@
       document.getElementById('bottom-sheet').classList.remove('open');
     }
 
+    // ── Landmark detail modal (collection) ──
+    function showLandmarkModal(landmark) {
+      const modal = document.getElementById('landmark-modal');
+      const card = document.getElementById('landmark-modal-card');
+      const color = getRarityColor(landmark.rarity);
+      const icon = POI_ICONS[landmark.id] || '📍';
+      const rarityLabel = landmark.rarity.charAt(0).toUpperCase() + landmark.rarity.slice(1);
+
+      card.className = 'landmark-modal-card rarity-' + landmark.rarity;
+      card.innerHTML = `
+        <button type="button" class="landmark-modal-close" id="landmark-modal-close" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <div class="landmark-modal-icon" style="--rarity-color:${color}">${icon}</div>
+        <h3 class="landmark-modal-name">${landmark.name}</h3>
+        <span class="landmark-modal-rarity" style="color:${color};border-color:${color}40;background:${color}18">${rarityLabel}</span>
+        <p class="landmark-modal-desc">${landmark.flavour}</p>
+        <div class="landmark-modal-status">
+          <span class="landmark-modal-status-dot"></span>
+          Unlocked
+        </div>
+      `;
+
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.getElementById('landmark-modal-close').addEventListener('click', hideLandmarkModal);
+    }
+
+    function hideLandmarkModal() {
+      const modal = document.getElementById('landmark-modal');
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+
     // ── Collection ──
+    function getCollectionRowData() {
+      return LANDMARKS
+        .map((lm, index) => ({ lm, index }))
+        .sort((a, b) => {
+          if (a.lm.unlocked !== b.lm.unlocked) return b.lm.unlocked - a.lm.unlocked;
+          return a.index - b.index;
+        })
+        .map(({ lm }) => {
+          const distanceM = userPos
+            ? haversine(userPos.lat, userPos.lng, lm.lat, lm.lng)
+            : null;
+
+          return {
+            id: lm.id,
+            name: lm.unlocked ? lm.name : 'Unknown landmark',
+            distance: distanceM != null ? formatDistance(distanceM) : '—',
+            distanceM,
+            unlocked: lm.unlocked
+          };
+        });
+    }
+
+    function initCollectionGrid() {
+      const gridEl = document.getElementById('collection-grid');
+
+      collectionGridApi = agGrid.createGrid(gridEl, {
+        columnDefs: [
+          {
+            field: 'name',
+            headerName: 'Landmark',
+            flex: 1,
+            minWidth: 130,
+            cellStyle: params => ({
+              color: params.data.unlocked ? 'var(--text)' : 'var(--text-dim)',
+              fontWeight: params.data.unlocked ? '500' : '400'
+            })
+          },
+          {
+            field: 'distanceM',
+            headerName: 'Distance',
+            width: 100,
+            maxWidth: 110,
+            valueFormatter: params => params.data.distance,
+            comparator: (a, b) => {
+              if (a == null && b == null) return 0;
+              if (a == null) return 1;
+              if (b == null) return -1;
+              return a - b;
+            },
+            cellStyle: {
+              color: 'var(--text-dim)',
+              textAlign: 'right',
+              paddingRight: '12px'
+            }
+          }
+        ],
+        rowData: getCollectionRowData(),
+        rowClassRules: {
+          'collection-row--locked': params => !params.data.unlocked,
+          'collection-row--unlocked': params => params.data.unlocked
+        },
+        defaultColDef: {
+          sortable: true,
+          filter: false,
+          resizable: false,
+          suppressMovable: true
+        },
+        suppressCellFocus: true,
+        animateRows: true,
+        headerHeight: 40,
+        rowHeight: 48,
+        onRowClicked: event => {
+          if (event.data.unlocked) {
+            const lm = getLandmark(event.data.id);
+            if (lm) showLandmarkModal(lm);
+          }
+        },
+        onGridReady: params => params.api.sizeColumnsToFit()
+      });
+    }
+
     function renderCollection() {
-      const grid = document.getElementById('collection-grid');
       const unlockedCount = LANDMARKS.filter(l => l.unlocked).length;
       document.getElementById('progress-counter').textContent =
         unlockedCount + ' / ' + LANDMARKS.length + ' unlocked';
 
-      grid.innerHTML = LANDMARKS.map(lm => {
-        if (lm.unlocked) {
-          return `
-            <div class="card-3d-wrap">
-              <div class="card unlocked rarity-${lm.rarity}" data-id="${lm.id}">
-                <div style="font-size:28px;text-align:center;margin-bottom:8px">${POI_ICONS[lm.id] || '📍'}</div>
-                <div class="card-name">${lm.name}</div>
-                <span class="rarity-badge ${lm.rarity}">${lm.rarity}</span>
-                <p class="card-flavour">${lm.flavour}</p>
-              </div>
-            </div>
-          `;
-        }
-        return `
-          <div class="card-3d-wrap">
-            <div class="card locked">
-              <div class="card-name">???</div>
-            </div>
-          </div>
-        `;
-      }).join('');
+      if (!collectionGridApi) {
+        initCollectionGrid();
+        return;
+      }
 
-      grid.querySelectorAll('.card.unlocked').forEach(el => {
-        el.addEventListener('click', () => {
-          const lm = getLandmark(el.dataset.id);
-          if (lm) showBottomSheet(lm);
-        });
-      });
+      collectionGridApi.setGridOption('rowData', getCollectionRowData());
+      collectionGridApi.sizeColumnsToFit();
     }
 
     // ── View toggle ──
@@ -430,8 +805,11 @@
       document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.view === view);
       });
-      if (view === 'collection') renderCollection();
-      if (view === 'map' && map) setTimeout(() => map.invalidateSize(), 100);
+      if (view === 'collection') {
+        renderCollection();
+        setTimeout(() => collectionGridApi?.sizeColumnsToFit(), 100);
+      }
+      if (view === 'map' && map) setTimeout(() => map.resize(), 100);
     }
 
     // ── Demo mode ──
@@ -442,6 +820,7 @@
 
       if (demoMode) {
         hideGeoPrompt();
+        hidePhotoPrompt();
       } else if (!hasLocatedUser) {
         showGeoPrompt(
           'Share your location',
@@ -468,7 +847,14 @@
       });
 
       updateUserPosition(nearest.lat, nearest.lng);
-      if (map) map.setView([nearest.lat, nearest.lng], 16);
+      if (map) {
+        map.flyTo({
+          center: [nearest.lng, nearest.lat],
+          zoom: MAP_ZOOM,
+          pitch: MAP_PITCH,
+          duration: 1200
+        });
+      }
     }
 
     // ── Geolocation ──
@@ -533,6 +919,8 @@
 
       updateUserPosition(lat, lng, { centerMap: shouldCenter });
       hasLocatedUser = true;
+      applyGpsHeading(pos);
+      maybeShowPhotoPrompt();
     }
 
     function startGeolocationWatch() {
@@ -562,6 +950,8 @@
       btn.disabled = true;
       btn.textContent = 'LOCATING...';
 
+      requestOrientationAccess();
+
       navigator.geolocation.getCurrentPosition(
         pos => {
           handleGeoPosition(pos, { centerMap });
@@ -582,40 +972,75 @@
     }
 
     // ── Map init ──
+    function hideMapClutter() {
+      if (!map) return;
+
+      const hidePattern = /poi|label|text|icon|amenity|place|station|airport|mountain|housenumber|watername|roadname|shield/i;
+
+      map.getStyle().layers.forEach(layer => {
+        const id = layer.id.toLowerCase();
+        const shouldHide = layer.type === 'symbol' || hidePattern.test(id);
+        if (!shouldHide) return;
+
+        try {
+          map.setLayoutProperty(layer.id, 'visibility', 'none');
+        } catch (e) {}
+      });
+    }
+
     function initMap() {
-      map = L.map('map', { zoomControl: true }).setView([51.511, -0.09], 14);
-
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap &copy; CARTO',
-        subdomains: 'abcd',
-        maxZoom: 20
-      }).addTo(map);
-
-      userIcon = L.divIcon({
-        className: 'user-marker-wrap',
-        html: `
-          <div class="user-beacon">
-            <div class="user-beacon-ring"></div>
-            <div class="user-beacon-ring"></div>
-            <div class="user-beacon-shadow"></div>
-            <div class="user-beacon-avatar"></div>
-          </div>
-        `,
-        iconSize: [48, 56],
-        iconAnchor: [24, 48]
+      map = new maplibregl.Map({
+        container: 'map',
+        style: MAP_STYLE,
+        center: [-0.09, 51.511],
+        zoom: 15,
+        pitch: MAP_PITCH,
+        bearing: -12,
+        maxPitch: 60,
+        antialias: true
       });
 
-      LANDMARKS.forEach(lm => {
-        const marker = L.marker([lm.lat, lm.lng], {
-          icon: createLandmarkIcon(lm),
-          zIndexOffset: lm.unlocked ? 500 : 100
-        }).addTo(map);
+      map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
 
-        marker.on('click', () => showBottomSheet(lm));
-        markersById[lm.id] = marker;
+      map.on('rotate', () => {
+        if (userHeading != null) updateHeadingArrow(userHeading);
       });
 
-      updateMarkerProximity();
+      map.on('load', () => {
+        hideMapClutter();
+
+        map.addSource('unlock-radius', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [] }
+        });
+
+        map.addLayer({
+          id: 'unlock-radius-fill',
+          type: 'fill',
+          source: 'unlock-radius',
+          paint: {
+            'fill-color': '#22c55e',
+            'fill-opacity': 0.14
+          }
+        });
+
+        map.addLayer({
+          id: 'unlock-radius-outline',
+          type: 'line',
+          source: 'unlock-radius',
+          paint: {
+            'line-color': '#4ade80',
+            'line-width': 2,
+            'line-opacity': 0.6
+          }
+        });
+
+        LANDMARKS.forEach(lm => {
+          markersById[lm.id] = createLandmarkMarker(lm);
+        });
+
+        updateMarkerProximity();
+      });
     }
 
     // ── Event listeners ──
@@ -624,7 +1049,13 @@
     });
 
     document.getElementById('sheet-backdrop').addEventListener('click', hideBottomSheet);
+    document.getElementById('landmark-modal-backdrop').addEventListener('click', hideLandmarkModal);
     document.getElementById('celebration').addEventListener('click', hideCelebration);
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') hideLandmarkModal();
+      if (e.key === 'd' || e.key === 'D') toggleDemoMode();
+    });
 
     document.getElementById('header-title').addEventListener('click', () => {
       headerTapCount++;
@@ -638,15 +1069,19 @@
 
     document.getElementById('debug-btn').addEventListener('click', toggleDemoMode);
 
-    document.addEventListener('keydown', e => {
-      if (e.key === 'd' || e.key === 'D') toggleDemoMode();
-    });
-
     document.getElementById('teleport-btn').addEventListener('click', teleportToNextLocked);
     document.getElementById('geo-enable-btn').addEventListener('click', () => {
       requestUserLocation({ centerMap: true });
     });
     document.getElementById('reset-btn').addEventListener('click', resetProgress);
+    document.getElementById('photo-capture-btn').addEventListener('click', openPhotoPicker);
+    document.getElementById('photo-skip-btn').addEventListener('click', hidePhotoPrompt);
+    document.getElementById('change-photo-btn').addEventListener('click', openPhotoPicker);
+    document.getElementById('photo-input').addEventListener('change', e => {
+      const file = e.target.files?.[0];
+      handlePhotoSelected(file);
+      e.target.value = '';
+    });
 
     // ── Boot ──
     async function boot() {
@@ -657,6 +1092,7 @@
         return;
       }
       loadUnlocked();
+      loadProfilePhoto();
       initMap();
       LANDMARKS.forEach(lm => { if (lm.unlocked) restyleMarker(lm.id); });
       renderCollection();
