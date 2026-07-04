@@ -112,8 +112,8 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsY2Jjb3dpaWpqdGx1Zm9yZGNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDk1NzgsImV4cCI6MjA5Nzk4NTU3OH0.QkZMFfpcTDchc0zHyQ0cj0LFm09kxR_hukKoXwiTBrY';
     const CONFIDENCE_THRESHOLD = 7;
     const UNLOCK_RADIUS_M = 100;
+    const FUZZ_RADIUS_M = UNLOCK_RADIUS_M;
     const FUZZ_MIN_M = 55;
-    const FUZZ_MAX_M = 165;
     const MAP_ZOOM = 17;
     const MAP_PITCH = 52;
     const MAP_STYLE = 'https://tiles.openfreemap.org/styles/positron';
@@ -204,7 +204,7 @@
       const h = hashId(lm.id);
       const angle = (h % 3600) / 10;
       const t = ((h >>> 8) % 1000) / 1000;
-      const distanceM = FUZZ_MIN_M + t * (FUZZ_MAX_M - FUZZ_MIN_M);
+      const distanceM = FUZZ_MIN_M + t * (FUZZ_RADIUS_M - FUZZ_MIN_M);
       const offset = offsetCoords(lm.lat, lm.lng, distanceM, angle);
       return { ...lm, displayLat: offset.lat, displayLng: offset.lng };
     }
@@ -322,6 +322,7 @@
       }
 
       LANDMARKS.forEach(lm => restyleMarker(lm.id));
+      updateFuzzRadiusCircles();
       renderCollection();
       hideBottomSheet();
       hideLandmarkModal();
@@ -622,9 +623,37 @@
       else map.once('load', apply);
     }
 
+    function getLandmarkProximityM(lm) {
+      if (!userPos) return null;
+      return haversine(userPos.lat, userPos.lng, lm.lat, lm.lng);
+    }
+
+    function isInVicinity(lm) {
+      const dist = getLandmarkProximityM(lm);
+      return dist != null && dist <= UNLOCK_RADIUS_M;
+    }
+
     function isClaimable(lm) {
       if (!lm || lm.unlocked || !userPos) return false;
-      return haversine(userPos.lat, userPos.lng, lm.lat, lm.lng) <= UNLOCK_RADIUS_M;
+      return isInVicinity(lm);
+    }
+
+    function updateFuzzRadiusCircles() {
+      if (!map) return;
+
+      const apply = () => {
+        const source = map.getSource('fuzz-radius');
+        if (!source) return;
+        source.setData({
+          type: 'FeatureCollection',
+          features: LANDMARKS
+            .filter(lm => !lm.unlocked && isInVicinity(lm))
+            .map(lm => circlePolygon(lm.lat, lm.lng, FUZZ_RADIUS_M))
+        });
+      };
+
+      if (map.isStyleLoaded()) apply();
+      else map.once('load', apply);
     }
 
     function updateMarkerProximity() {
@@ -636,18 +665,23 @@
           claimableIds.delete(lm.id);
           return;
         }
-        const dist = haversine(userPos.lat, userPos.lng, lm.lat, lm.lng);
+        const dist = getLandmarkProximityM(lm);
         if (dist <= 300) el.classList.add('nearby');
-        if (dist <= UNLOCK_RADIUS_M) {
+        if (isInVicinity(lm)) {
           el.classList.add('in-range', 'claimable');
+          const disc = el.querySelector('.poi-disc');
+          if (disc) disc.textContent = '!';
           if (!claimableIds.has(lm.id)) {
             claimableIds.add(lm.id);
             onLandmarkClaimable(lm);
           }
         } else {
+          const disc = el.querySelector('.poi-disc');
+          if (disc) disc.textContent = '?';
           claimableIds.delete(lm.id);
         }
       });
+      updateFuzzRadiusCircles();
     }
 
     // ── Claim pipeline ──
@@ -1287,9 +1321,35 @@
       map.on('load', () => {
         hideMapClutter();
 
+        map.addSource('fuzz-radius', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [] }
+        });
+
         map.addSource('unlock-radius', {
           type: 'geojson',
           data: { type: 'FeatureCollection', features: [] }
+        });
+
+        map.addLayer({
+          id: 'fuzz-radius-fill',
+          type: 'fill',
+          source: 'fuzz-radius',
+          paint: {
+            'fill-color': '#f59e0b',
+            'fill-opacity': 0.08
+          }
+        });
+
+        map.addLayer({
+          id: 'fuzz-radius-outline',
+          type: 'line',
+          source: 'fuzz-radius',
+          paint: {
+            'line-color': '#f59e0b',
+            'line-width': 1.5,
+            'line-opacity': 0.35
+          }
         });
 
         map.addLayer({
