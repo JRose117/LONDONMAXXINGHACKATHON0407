@@ -1,0 +1,750 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0f0f13;
+  --surface: #1a1a22;
+  --text: #e5e5e5;
+  --text-dim: #6b7280;
+  --common: #9ca3af;
+  --rare: #3b82f6;
+  --epic: #a855f7;
+  --legendary: #f59e0b;
+  --locked: #4b5563;
+  --header-h: 56px;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow: hidden;
+}
+
+h1, h2, h3, .pixel-font {
+  font-family: 'Press Start 2P', monospace;
+  line-height: 1.6;
+}
+
+/* Header */
+header {
+  height: var(--header-h);
+  background: var(--bg);
+  border-bottom: 3px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  position: relative;
+  z-index: 1000;
+}
+
+.header-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: var(--legendary);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.header-title .subtitle {
+  display: block;
+  font-size: 6px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+.demo-badge {
+  display: none;
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: var(--epic);
+  background: var(--surface);
+  border: 2px solid var(--epic);
+  padding: 2px 6px;
+  box-shadow: 2px 2px 0 #000;
+}
+
+.demo-badge.visible { display: block; }
+
+nav.tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.tab-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  padding: 10px 12px;
+  min-height: 44px;
+  min-width: 44px;
+  background: var(--surface);
+  color: var(--text);
+  border: 2px solid #000;
+  box-shadow: 4px 4px 0 #000;
+  cursor: pointer;
+  transition: transform 0.05s, box-shadow 0.05s;
+}
+
+.tab-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+.tab-btn.active {
+  background: var(--legendary);
+  color: #000;
+}
+
+/* Views */
+.view {
+  display: none;
+  height: calc(100vh - var(--header-h));
+  height: calc(100dvh - var(--header-h));
+}
+
+.view.active { display: block; }
+
+.map-stage {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+  background: #1a1a2e;
+}
+
+.map-vignette {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 500;
+  background:
+    radial-gradient(ellipse at center, transparent 55%, rgba(15,15,19,0.25) 100%),
+    linear-gradient(to bottom, rgba(15,15,19,0.35) 0%, transparent 12%, transparent 88%, rgba(15,15,19,0.45) 100%);
+}
+
+.map-scan {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 501;
+  opacity: 0.15;
+  background: conic-gradient(from 0deg, transparent 0deg, rgba(34,197,94,0.15) 30deg, transparent 60deg);
+  animation: radarSweep 4s linear infinite;
+}
+
+@keyframes radarSweep {
+  to { transform: rotate(360deg); }
+}
+
+/* 3D user beacon */
+.user-beacon {
+  width: 48px;
+  height: 56px;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.user-beacon-ring {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  width: 40px;
+  height: 14px;
+  margin-left: -20px;
+  border: 2px solid rgba(34,197,94,0.6);
+  border-radius: 50%;
+  animation: beaconRing 2s ease-out infinite;
+}
+
+.user-beacon-ring:nth-child(2) { animation-delay: 0.7s; }
+
+@keyframes beaconRing {
+  0% { transform: scale(0.5); opacity: 0.9; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+.user-beacon-shadow {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 18px;
+  height: 6px;
+  margin-left: -9px;
+  background: rgba(0,0,0,0.45);
+  border-radius: 50%;
+  filter: blur(1px);
+}
+
+.user-beacon-avatar {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 22px;
+  background: linear-gradient(145deg, #4ade80 0%, #16a34a 50%, #15803d 100%);
+  border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 -3px 0 rgba(0,0,0,0.2), inset 0 3px 0 rgba(255,255,255,0.3);
+  animation: beaconBob 2s ease-in-out infinite;
+}
+
+.user-beacon-avatar::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 5px;
+  width: 6px;
+  height: 4px;
+  background: rgba(255,255,255,0.5);
+  border-radius: 50%;
+}
+
+@keyframes beaconBob {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-4px); }
+}
+
+/* 3D POI pins (Pokémon GO style) */
+.poi-pin {
+  width: 44px;
+  height: 64px;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: pinBob 2.5s ease-in-out infinite;
+}
+
+.poi-pin.unlocked { animation-duration: 3s; }
+
+@keyframes pinBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.poi-shadow {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 28px;
+  height: 10px;
+  margin-left: -14px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 50%;
+  filter: blur(2px);
+  transform: scaleY(0.5);
+}
+
+.poi-stem {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  width: 8px;
+  height: 22px;
+  margin-left: -4px;
+  background: linear-gradient(90deg, #374151 0%, #6b7280 40%, #374151 100%);
+  border-radius: 2px;
+  box-shadow: 1px 0 0 rgba(255,255,255,0.1);
+}
+
+.poi-disc-wrap {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  transform-style: preserve-3d;
+}
+
+.poi-disc {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  box-shadow:
+    0 6px 12px rgba(0,0,0,0.45),
+    inset 0 -4px 0 rgba(0,0,0,0.25),
+    inset 0 4px 0 rgba(255,255,255,0.25);
+  transform: rotateX(12deg);
+  position: relative;
+}
+
+.poi-disc::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: linear-gradient(160deg, rgba(255,255,255,0.35) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.poi-pin.locked .poi-disc {
+  background: linear-gradient(145deg, #6b7280 0%, #374151 60%, #1f2937 100%);
+  filter: saturate(0.4);
+  opacity: 0.85;
+}
+
+.poi-pin.locked .poi-stem { opacity: 0.6; }
+
+.poi-ring {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  width: 44px;
+  height: 16px;
+  margin-left: -22px;
+  border: 2px solid var(--ring-color, #6b7280);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.poi-pin.nearby .poi-ring {
+  opacity: 0.7;
+  animation: poiRingPulse 1.8s ease-out infinite;
+}
+
+.poi-pin.in-range .poi-ring {
+  --ring-color: #22c55e;
+  opacity: 1;
+  animation: poiRingPulse 1s ease-out infinite;
+}
+
+.poi-pin.in-range .poi-disc {
+  animation: poiGlow 1s ease-in-out infinite alternate;
+}
+
+@keyframes poiRingPulse {
+  0% { transform: scale(0.8); opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+@keyframes poiGlow {
+  from { filter: brightness(1) saturate(1); }
+  to { filter: brightness(1.2) saturate(1.3); }
+}
+
+.poi-pin.unlocked .poi-glow {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  margin-left: -20px;
+  border-radius: 50%;
+  filter: blur(8px);
+  opacity: 0.5;
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.15); }
+}
+
+/* Collection view */
+#view-collection {
+  overflow-y: auto;
+  padding: 16px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+
+.collection-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.collection-header h2 {
+  font-size: 12px;
+  margin-bottom: 8px;
+  color: var(--legendary);
+}
+
+.progress-counter {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: var(--text);
+}
+
+.collection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.card-3d-wrap {
+  perspective: 600px;
+}
+
+.card {
+  background: linear-gradient(165deg, #22222c 0%, var(--surface) 40%, #14141a 100%);
+  border: 3px solid #000;
+  padding: 12px;
+  image-rendering: pixelated;
+  box-shadow: 4px 4px 0 #000, 0 8px 20px rgba(0,0,0,0.4);
+  cursor: default;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transform: rotateX(8deg);
+  transform-style: preserve-3d;
+  position: relative;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.06), transparent);
+  pointer-events: none;
+}
+
+.card.unlocked {
+  cursor: pointer;
+}
+
+.card.unlocked:hover,
+.card.unlocked:active {
+  transform: rotateX(0deg) translateY(-4px) scale(1.02);
+  box-shadow: 4px 8px 0 #000, 0 16px 32px rgba(0,0,0,0.5);
+}
+
+.card.locked {
+  opacity: 0.45;
+  border-color: var(--locked);
+}
+
+.card.rarity-common { border-color: var(--common); box-shadow: 4px 4px 0 #000, 0 0 12px rgba(156,163,175,0.3); }
+.card.rarity-rare { border-color: var(--rare); box-shadow: 4px 4px 0 #000, 0 0 12px rgba(59,130,246,0.4); }
+.card.rarity-epic { border-color: var(--epic); box-shadow: 4px 4px 0 #000, 0 0 12px rgba(168,85,247,0.4); }
+.card.rarity-legendary { border-color: var(--legendary); box-shadow: 4px 4px 0 #000, 0 0 16px rgba(245,158,11,0.5); }
+
+.card-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+
+.card.locked .card-name {
+  color: var(--text-dim);
+  text-align: center;
+  font-size: 14px;
+  padding: 20px 0;
+}
+
+.rarity-badge {
+  display: inline-block;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px;
+  padding: 4px 6px;
+  border: 2px solid #000;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.rarity-badge.common { background: var(--common); color: #000; }
+.rarity-badge.rare { background: var(--rare); color: #fff; }
+.rarity-badge.epic { background: var(--epic); color: #fff; }
+.rarity-badge.legendary { background: var(--legendary); color: #000; }
+
+.card-flavour {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+/* Bottom sheet */
+#bottom-sheet {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2000;
+  padding: 0 12px calc(12px + env(safe-area-inset-bottom));
+  perspective: 600px;
+}
+
+#bottom-sheet.open { display: block; }
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: -1;
+}
+
+.sheet-close {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  float: right;
+  background: var(--bg);
+  color: var(--text);
+  border: 2px solid #000;
+  box-shadow: 3px 3px 0 #000;
+  padding: 6px 10px;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
+.sheet-close:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #000;
+}
+
+.sheet-distance {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--legendary);
+  margin-top: 8px;
+}
+
+.sheet-locked-msg {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-top: 8px;
+}
+
+/* Celebration overlay — 3D loot drop */
+#celebration {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: radial-gradient(ellipse at center, rgba(20,20,30,0.92) 0%, rgba(0,0,0,0.95) 100%);
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  perspective: 800px;
+  overflow: hidden;
+}
+
+#celebration.open {
+  display: flex;
+}
+
+.celebration-rays {
+  position: absolute;
+  width: 200vmax;
+  height: 200vmax;
+  background: conic-gradient(from 0deg, transparent, rgba(245,158,11,0.08), transparent, rgba(168,85,247,0.08), transparent);
+  animation: raysSpin 8s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes raysSpin {
+  to { transform: rotate(360deg); }
+}
+
+.celebration-scene {
+  position: relative;
+  transform-style: preserve-3d;
+  animation: cardReveal3d 0.7s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+}
+
+@keyframes cardReveal3d {
+  0% {
+    transform: translateY(80px) rotateX(75deg) scale(0.3);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(-12px) rotateX(-8deg) scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) rotateX(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+.celebration-card {
+  background: linear-gradient(165deg, #2a2a35 0%, var(--surface) 35%, #12121a 100%);
+  border: 4px solid #000;
+  padding: 24px;
+  max-width: 320px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 8px 12px 0 #000, 0 20px 60px rgba(0,0,0,0.6);
+  transform-style: preserve-3d;
+  position: relative;
+}
+
+.celebration-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.celebration-card.rarity-common { border-color: var(--common); box-shadow: 8px 12px 0 #000, 0 0 40px rgba(156,163,175,0.5), 0 30px 60px rgba(156,163,175,0.2); }
+.celebration-card.rarity-rare { border-color: var(--rare); box-shadow: 8px 12px 0 #000, 0 0 50px rgba(59,130,246,0.6), 0 30px 60px rgba(59,130,246,0.25); }
+.celebration-card.rarity-epic { border-color: var(--epic); box-shadow: 8px 12px 0 #000, 0 0 50px rgba(168,85,247,0.6), 0 30px 60px rgba(168,85,247,0.25); }
+.celebration-card.rarity-legendary { border-color: var(--legendary); box-shadow: 8px 12px 0 #000, 0 0 60px rgba(245,158,11,0.8), 0 30px 80px rgba(245,158,11,0.3); }
+
+.celebration-sparkles {
+  position: absolute;
+  inset: -20px;
+  pointer-events: none;
+}
+
+.sparkle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #fff;
+  border-radius: 50%;
+  animation: sparklePop 0.8s ease-out forwards;
+}
+
+@keyframes sparklePop {
+  0% { transform: scale(0); opacity: 1; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+.celebration-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--legendary);
+  margin-bottom: 16px;
+}
+
+.celebration-card .card-name {
+  font-size: 10px;
+  margin-bottom: 12px;
+}
+
+.celebration-hint {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px;
+  color: var(--text-dim);
+  margin-top: 16px;
+}
+
+/* Geo banner */
+#geo-banner {
+  display: none;
+  position: fixed;
+  top: var(--header-h);
+  left: 0;
+  right: 0;
+  z-index: 1500;
+  background: #7f1d1d;
+  color: #fecaca;
+  padding: 10px 16px;
+  font-size: 12px;
+  text-align: center;
+  border-bottom: 2px solid #000;
+}
+
+#geo-banner.visible { display: block; }
+
+/* Demo controls */
+#debug-btn {
+  display: none;
+  position: fixed;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  left: 12px;
+  z-index: 1100;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px;
+  padding: 8px;
+  background: var(--surface);
+  color: var(--text-dim);
+  border: 2px solid #000;
+  box-shadow: 3px 3px 0 #000;
+  cursor: pointer;
+  opacity: 0.5;
+}
+
+#debug-btn.visible { display: block; }
+
+#debug-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+#teleport-btn {
+  display: none;
+  position: fixed;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  right: 12px;
+  z-index: 1100;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  padding: 12px 14px;
+  min-height: 44px;
+  background: var(--epic);
+  color: #fff;
+  border: 3px solid #000;
+  box-shadow: 4px 4px 0 #000;
+  cursor: pointer;
+  max-width: 160px;
+  line-height: 1.8;
+}
+
+#teleport-btn.visible { display: block; }
+
+#teleport-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+/* Leaflet marker overrides */
+.poi-marker-wrap,
+.user-marker-wrap {
+  background: none !important;
+  border: none !important;
+}
+
+.leaflet-marker-icon {
+  transition: none;
+}
+
+.unlock-radius-circle {
+  pointer-events: none;
+}
+
+/* 3D bottom sheet */
+.sheet-content {
+  background: linear-gradient(165deg, #22222c 0%, var(--surface) 40%, #14141a 100%);
+  border: 3px solid #000;
+  box-shadow: 0 -8px 0 #000, 0 -4px 24px rgba(0,0,0,0.5);
+  padding: 16px;
+  max-height: 60vh;
+  overflow-y: auto;
+  animation: sheetRise3d 0.35s cubic-bezier(0.34, 1.2, 0.64, 1);
+  transform-origin: bottom center;
+}
+
+@keyframes sheetRise3d {
+  from { transform: translateY(100%) rotateX(20deg); opacity: 0.5; }
+  to { transform: translateY(0) rotateX(0deg); opacity: 1; }
+}
+
+.sheet-poi-icon {
+  font-size: 40px;
+  text-align: center;
+  margin: 8px 0 12px;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+}
+  </style>

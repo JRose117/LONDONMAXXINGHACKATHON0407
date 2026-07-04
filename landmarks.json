@@ -1,0 +1,90 @@
+[
+  {
+    "id": "tower-bridge",
+    "name": "Tower Bridge",
+    "lat": 51.5055,
+    "lng": -0.0754,
+    "rarity": "legendary",
+    "flavour": "Victorian steel rises over the Thames like a drawbridge to another age. Ships still pass beneath its bascules as they have for over a century."
+  },
+  {
+    "id": "st-pauls",
+    "name": "St Paul's Cathedral",
+    "lat": 51.5138,
+    "lng": -0.0984,
+    "rarity": "epic",
+    "flavour": "Wren's dome crowns the City skyline, surviving blitz and centuries alike. Step inside and the whispered weight of history fills the whispering gallery."
+  },
+  {
+    "id": "borough-market",
+    "name": "Borough Market",
+    "lat": 51.5054,
+    "lng": -0.0910,
+    "rarity": "common",
+    "flavour": "Aromas of sourdough and aged cheese drift between Victorian iron arches. London's oldest food market feeds the hungry and the curious in equal measure."
+  },
+  {
+    "id": "leadenhall-market",
+    "name": "Leadenhall Market",
+    "lat": 51.5126,
+    "lng": -0.0834,
+    "rarity": "rare",
+    "flavour": "Painted cobbles and glass vaults hide a market older than the City itself. Victorian elegance wraps around a site where Romans once traded."
+  },
+  {
+    "id": "postmans-park",
+    "name": "Postman's Park",
+    "lat": 51.5167,
+    "lng": -0.0976,
+    "rarity": "common",
+    "flavour": "A quiet green pocket among the towers of the City. Watts' Memorial honours ordinary heroes who gave their lives for strangers."
+  },
+  {
+    "id": "monument",
+    "name": "The Monument",
+    "lat": 51.5101,
+    "lng": -0.0860,
+    "rarity": "common",
+    "flavour": "A fluted column of Portland stone marks where the Great Fire began in 1666. Climb its spiral stair and the whole of London unfolds below."
+  },
+  {
+    "id": "globe-theatre",
+    "name": "Shakespeare's Globe",
+    "lat": 51.5081,
+    "lng": -0.0972,
+    "rarity": "epic",
+    "flavour": "Thatched roof and open sky recreate the stage where Hamlet first walked. The groundlings' pit still rings with the Bard's immortal words."
+  },
+  {
+    "id": "guildhall",
+    "name": "Guildhall",
+    "lat": 51.5155,
+    "lng": -0.0925,
+    "rarity": "rare",
+    "flavour": "Medieval grandeur at the heart of City governance for eight hundred years. The Great Hall's timber roof has witnessed coronations and rebellion."
+  },
+  {
+    "id": "leake-street",
+    "name": "Leake Street Arches",
+    "lat": 51.5018,
+    "lng": -0.1145,
+    "rarity": "common",
+    "flavour": "Banksy's tunnel of ever-changing graffiti beneath Waterloo. Every wall is a canvas; every visit reveals something new."
+  },
+  {
+    "id": "temple-church",
+    "name": "Temple Church",
+    "lat": 51.5132,
+    "lng": -0.1109,
+    "rarity": "rare",
+    "flavour": "Round nave and effigies of crusader knights guard this Templar sanctuary. The Da Vinci Code made it famous; its stones remember the twelfth century."
+  },
+  {
+    "id": "ramen-space",
+    "name": "Ramen Space",
+    "lat": 51.54496073887296,
+    "lng": -0.07491801181174133,
+    "rarity": "common",
+    "flavour": "A ramen restaurant in the City of London. It's a popular spot for ramen lovers."
+  }
+]

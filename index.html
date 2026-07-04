@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f0f13">
+  <title>Unlock London</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="header-title" id="header-title">
+      UNLOCK LONDON
+      <span class="subtitle">heritage discovery</span>
+    </div>
+    <div class="demo-badge" id="demo-badge">DEMO</div>
+    <nav class="tabs">
+      <button class="tab-btn active" data-view="map">MAP</button>
+      <button class="tab-btn" data-view="collection">CARDS</button>
+    </nav>
+  </header>
+
+  <div id="geo-banner"></div>
+
+  <div id="view-map" class="view active">
+    <div class="map-stage">
+      <div id="map"></div>
+      <div class="map-vignette"></div>
+      <div class="map-scan"></div>
+    </div>
+  </div>
+
+  <div id="view-collection" class="view">
+    <div class="collection-header">
+      <h2>YOUR COLLECTION</h2>
+      <div class="progress-counter" id="progress-counter">0 / 10 unlocked</div>
+    </div>
+    <div class="collection-grid" id="collection-grid"></div>
+  </div>
+
+  <div id="bottom-sheet">
+    <div class="sheet-backdrop" id="sheet-backdrop"></div>
+    <div class="sheet-content" id="sheet-content"></div>
+  </div>
+
+  <div id="celebration">
+    <div class="celebration-rays"></div>
+    <div class="celebration-scene" id="celebration-scene">
+      <div class="celebration-card" id="celebration-card"></div>
+    </div>
+  </div>
+
+  <button id="debug-btn" title="Toggle demo mode">DBG</button>
+  <button id="teleport-btn">Teleport to next locked landmark</button>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+    // ── Constants ──
+    const STORAGE_KEY = 'unlock-london:v1';
+    const UNLOCK_RADIUS_M = 100;
+
+    const RARITY_COLORS = {
+      common: '#9ca3af',
+      rare: '#3b82f6',
+      epic: '#a855f7',
+      legendary: '#f59e0b'
+    };
+
+    const POI_ICONS = {
+      'tower-bridge': '🌉',
+      'st-pauls': '⛪',
+      'borough-market': '🍞',
+      'leadenhall-market': '🏛️',
+      'postmans-park': '🌿',
+      'monument': '🗼',
+      'globe-theatre': '🎭',
+      'guildhall': '🏰',
+      'leake-street': '🎨',
+      'temple-church': '⚔️'
+    };
+
+    let LANDMARKS = [];
+
+    // ── State ──
+    let currentView = 'map';
+    let demoMode = false;
+    let userPos = null;
+    let headerTapCount = 0;
+    let headerTapTimer = null;
+    let celebrationTimer = null;
+    let useMemoryStorage = false;
+    let memoryUnlockedIds = new Set();
+
+    let map = null;
+    let userMarker = null;
+    let userIcon = null;
+    let unlockCircle = null;
+    const markersById = {};
+    let geoWatchId = null;
+    let hasLocatedUser = false;
+
+    // ── Helpers ──
+    function getRarityColor(rarity) {
+      return RARITY_COLORS[rarity] || RARITY_COLORS.common;
+    }
+
+    function haversine(lat1, lng1, lat2, lng2) {
+      const R = 6371000;
+      const toRad = d => d * Math.PI / 180;
+      const dLat = toRad(lat2 - lat1);
+      const dLng = toRad(lng2 - lng1);
+      const a = Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function getLandmark(id) {
+      return LANDMARKS.find(l => l.id === id);
+    }
+
+    async function loadLandmarks() {
+      const res = await fetch('./landmarks.json');
+      if (!res.ok) throw new Error('Failed to load landmarks');
+      const data = await res.json();
+      LANDMARKS = data.map(lm => ({ ...lm, unlocked: false }));
+    }
+
+    function loadUnlocked() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const ids = JSON.parse(raw);
+          ids.forEach(id => {
+            const lm = getLandmark(id);
+            if (lm) lm.unlocked = true;
+          });
+        }
+      } catch (e) {
+        useMemoryStorage = true;
+        memoryUnlockedIds.forEach(id => {
+          const lm = getLandmark(id);
+          if (lm) lm.unlocked = true;
+        });
+      }
+    }
+
+    function saveUnlocked(id) {
+      if (useMemoryStorage) {
+        memoryUnlockedIds.add(id);
+        return;
+      }
+      try {
+        const ids = LANDMARKS.filter(l => l.unlocked).map(l => l.id);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
+      } catch (e) {
+        useMemoryStorage = true;
+        memoryUnlockedIds.add(id);
+      }
+    }
+
+    function formatDistance(m) {
+      if (m < 1000) return Math.round(m) + 'm';
+      return (m / 1000).toFixed(1) + 'km';
+    }
+
+    // ── Marker styling ──
+    function getMarkerEl(id) {
+      const marker = markersById[id];
+      if (!marker) return null;
+      return marker.getElement()?.querySelector('.poi-pin');
+    }
+
+    function createLandmarkIcon(landmark) {
+      const cls = landmark.unlocked ? 'unlocked' : 'locked';
+      const color = getRarityColor(landmark.rarity);
+      const icon = POI_ICONS[landmark.id] || '📍';
+      const displayIcon = landmark.unlocked ? icon : '?';
+      const discBg = landmark.unlocked
+        ? `linear-gradient(145deg, ${color} 0%, ${color}cc 45%, ${color}88 100%)`
+        : '';
+      const glowHtml = landmark.unlocked
+        ? `<div class="poi-glow" style="background:${color}"></div>`
+        : '';
+
+      return L.divIcon({
+        className: 'poi-marker-wrap',
+        html: `
+          <div class="poi-pin ${cls}" style="--ring-color:${color}">
+            ${glowHtml}
+            <div class="poi-ring"></div>
+            <div class="poi-shadow"></div>
+            <div class="poi-stem"></div>
+            <div class="poi-disc-wrap">
+              <div class="poi-disc" style="background:${discBg}">${displayIcon}</div>
+            </div>
+          </div>
+        `,
+        iconSize: [44, 64],
+        iconAnchor: [22, 58]
+      });
+    }
+
+    function restyleMarker(id) {
+      const landmark = getLandmark(id);
+      const marker = markersById[id];
+      if (!landmark || !marker) return;
+      marker.setIcon(createLandmarkIcon(landmark));
+      updateMarkerProximity();
+    }
+
+    function updateUnlockCircle(lat, lng) {
+      if (!map) return;
+      if (!unlockCircle) {
+        unlockCircle = L.circle([lat, lng], {
+          radius: UNLOCK_RADIUS_M,
+          color: '#4ade80',
+          fillColor: '#22c55e',
+          fillOpacity: 0.1,
+          weight: 2,
+          opacity: 0.55,
+          className: 'unlock-radius-circle'
+        }).addTo(map);
+        unlockCircle.bringToBack();
+      } else {
+        unlockCircle.setLatLng([lat, lng]);
+      }
+    }
+
+    function updateMarkerProximity() {
+      LANDMARKS.forEach(lm => {
+        const el = getMarkerEl(lm.id);
+        if (!el) return;
+        el.classList.remove('nearby', 'in-range');
+        if (lm.unlocked || !userPos) return;
+        const dist = haversine(userPos.lat, userPos.lng, lm.lat, lm.lng);
+        if (dist <= 300) el.classList.add('nearby');
+        if (dist <= UNLOCK_RADIUS_M) el.classList.add('in-range');
+      });
+    }
+
+    // ── Unlock pipeline ──
+    function checkUnlocks() {
+      if (!userPos) return;
+      LANDMARKS.forEach(lm => {
+        if (!lm.unlocked) {
+          const dist = haversine(userPos.lat, userPos.lng, lm.lat, lm.lng);
+          if (dist <= UNLOCK_RADIUS_M) {
+            unlockLandmark(lm.id);
+          }
+        }
+      });
+    }
+
+    function unlockLandmark(id) {
+      const landmark = getLandmark(id);
+      if (!landmark || landmark.unlocked) return;
+
+      landmark.unlocked = true;
+      saveUnlocked(id);
+      restyleMarker(id);
+      showCelebration(landmark);
+      renderCollection();
+    }
+
+    function updateUserPosition(lat, lng, { centerMap = false } = {}) {
+      userPos = { lat, lng };
+
+      if (!userMarker && map && userIcon) {
+        userMarker = L.marker([lat, lng], { icon: userIcon, zIndexOffset: 1000 }).addTo(map);
+      } else if (userMarker) {
+        userMarker.setLatLng([lat, lng]);
+      }
+
+      updateUnlockCircle(lat, lng);
+      updateMarkerProximity();
+      checkUnlocks();
+
+      if (centerMap && map) {
+        map.setView([lat, lng], Math.max(map.getZoom(), 15));
+      }
+    }
+
+    // ── Celebration ──
+    function showCelebration(landmark) {
+      const overlay = document.getElementById('celebration');
+      const scene = document.getElementById('celebration-scene');
+      const card = document.getElementById('celebration-card');
+      const color = getRarityColor(landmark.rarity);
+
+      scene.style.animation = 'none';
+      scene.offsetHeight;
+      scene.style.animation = '';
+
+      card.className = 'celebration-card rarity-' + landmark.rarity;
+      card.innerHTML = `
+        <div class="celebration-sparkles">${Array.from({ length: 8 }, (_, i) =>
+          `<span class="sparkle" style="top:${10 + Math.random() * 80}%;left:${5 + Math.random() * 90}%;animation-delay:${i * 0.08}s;background:${color}"></span>`
+        ).join('')}</div>
+        <div class="celebration-label">UNLOCKED!</div>
+        <div style="font-size:36px;margin:8px 0">${POI_ICONS[landmark.id] || '📍'}</div>
+        <div class="card-name">${landmark.name}</div>
+        <span class="rarity-badge ${landmark.rarity}">${landmark.rarity}</span>
+        <p class="card-flavour">${landmark.flavour}</p>
+        <div class="celebration-hint">tap to dismiss</div>
+      `;
+      overlay.classList.add('open');
+      clearTimeout(celebrationTimer);
+      celebrationTimer = setTimeout(hideCelebration, 2800);
+    }
+
+    function hideCelebration() {
+      document.getElementById('celebration').classList.remove('open');
+      clearTimeout(celebrationTimer);
+    }
+
+    // ── Bottom sheet ──
+    function showBottomSheet(landmark) {
+      const sheet = document.getElementById('bottom-sheet');
+      const content = document.getElementById('sheet-content');
+      let html = '<button class="sheet-close" id="sheet-close">X</button>';
+
+      if (landmark.unlocked) {
+        html += `
+          <div class="sheet-poi-icon">${POI_ICONS[landmark.id] || '📍'}</div>
+          <div class="card-name">${landmark.name}</div>
+          <span class="rarity-badge ${landmark.rarity}">${landmark.rarity}</span>
+          <p class="card-flavour">${landmark.flavour}</p>
+        `;
+      } else {
+        let distText = '—';
+        if (userPos) {
+          const dist = haversine(userPos.lat, userPos.lng, landmark.lat, landmark.lng);
+          distText = formatDistance(dist) + ' away';
+        }
+        html += `
+          <div class="sheet-poi-icon">?</div>
+          <div class="card-name">${landmark.name}</div>
+          <p class="sheet-locked-msg">??? — get closer to unlock</p>
+          <div class="sheet-distance">${distText}</div>
+        `;
+      }
+
+      content.innerHTML = html;
+      sheet.classList.add('open');
+      document.getElementById('sheet-close').addEventListener('click', hideBottomSheet);
+    }
+
+    function hideBottomSheet() {
+      document.getElementById('bottom-sheet').classList.remove('open');
+    }
+
+    // ── Collection ──
+    function renderCollection() {
+      const grid = document.getElementById('collection-grid');
+      const unlockedCount = LANDMARKS.filter(l => l.unlocked).length;
+      document.getElementById('progress-counter').textContent =
+        unlockedCount + ' / ' + LANDMARKS.length + ' unlocked';
+
+      grid.innerHTML = LANDMARKS.map(lm => {
+        if (lm.unlocked) {
+          return `
+            <div class="card-3d-wrap">
+              <div class="card unlocked rarity-${lm.rarity}" data-id="${lm.id}">
+                <div style="font-size:28px;text-align:center;margin-bottom:8px">${POI_ICONS[lm.id] || '📍'}</div>
+                <div class="card-name">${lm.name}</div>
+                <span class="rarity-badge ${lm.rarity}">${lm.rarity}</span>
+                <p class="card-flavour">${lm.flavour}</p>
+              </div>
+            </div>
+          `;
+        }
+        return `
+          <div class="card-3d-wrap">
+            <div class="card locked">
+              <div class="card-name">???</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      grid.querySelectorAll('.card.unlocked').forEach(el => {
+        el.addEventListener('click', () => {
+          const lm = getLandmark(el.dataset.id);
+          if (lm) showBottomSheet(lm);
+        });
+      });
+    }
+
+    // ── View toggle ──
+    function switchView(view) {
+      currentView = view;
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById('view-' + view).classList.add('active');
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === view);
+      });
+      if (view === 'collection') renderCollection();
+      if (view === 'map' && map) setTimeout(() => map.invalidateSize(), 100);
+    }
+
+    // ── Demo mode ──
+    function toggleDemoMode() {
+      demoMode = !demoMode;
+      document.getElementById('demo-badge').classList.toggle('visible', demoMode);
+      document.getElementById('teleport-btn').classList.toggle('visible', demoMode);
+
+      if (!demoMode && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => handleGeoPosition(pos, { centerMap: !hasLocatedUser }),
+          () => {},
+          { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
+        );
+      }
+    }
+
+    function teleportToNextLocked() {
+      const locked = LANDMARKS.filter(l => !l.unlocked);
+      if (locked.length === 0) return;
+
+      const refLat = userPos ? userPos.lat : 51.511;
+      const refLng = userPos ? userPos.lng : -0.09;
+
+      let nearest = locked[0];
+      let nearestDist = haversine(refLat, refLng, nearest.lat, nearest.lng);
+      locked.forEach(lm => {
+        const d = haversine(refLat, refLng, lm.lat, lm.lng);
+        if (d < nearestDist) {
+          nearestDist = d;
+          nearest = lm;
+        }
+      });
+
+      updateUserPosition(nearest.lat, nearest.lng);
+      if (map) map.setView([nearest.lat, nearest.lng], 16);
+    }
+
+    // ── Geolocation ──
+    function showGeoBanner(msg) {
+      const banner = document.getElementById('geo-banner');
+      banner.textContent = msg;
+      banner.classList.add('visible');
+    }
+
+    function handleGeoError(err) {
+      if (demoMode) return;
+      if (err.code === 1) {
+        showGeoBanner('Location blocked — allow access in browser settings');
+      } else if (err.code === 3) {
+        showGeoBanner('Location timed out — check GPS is enabled');
+      } else {
+        showGeoBanner('Location unavailable — try demo mode (press D)');
+      }
+    }
+
+    function handleGeoPosition(pos, { centerMap = false } = {}) {
+      if (demoMode) return;
+
+      document.getElementById('geo-banner').classList.remove('visible');
+
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      const shouldCenter = centerMap || !hasLocatedUser;
+
+      updateUserPosition(lat, lng, { centerMap: shouldCenter });
+      hasLocatedUser = true;
+    }
+
+    function startGeolocation() {
+      if (!navigator.geolocation) {
+        showGeoBanner('Location unavailable — try demo mode');
+        return;
+      }
+
+      if (!window.isSecureContext) {
+        showGeoBanner('Location requires HTTPS or localhost');
+        return;
+      }
+
+      const geoOptions = { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 };
+
+      navigator.geolocation.getCurrentPosition(
+        pos => handleGeoPosition(pos, { centerMap: true }),
+        handleGeoError,
+        geoOptions
+      );
+
+      geoWatchId = navigator.geolocation.watchPosition(
+        pos => handleGeoPosition(pos),
+        handleGeoError,
+        geoOptions
+      );
+    }
+
+    // ── Map init ──
+    function initMap() {
+      map = L.map('map', { zoomControl: true }).setView([51.511, -0.09], 14);
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap &copy; CARTO',
+        subdomains: 'abcd',
+        maxZoom: 20
+      }).addTo(map);
+
+      userIcon = L.divIcon({
+        className: 'user-marker-wrap',
+        html: `
+          <div class="user-beacon">
+            <div class="user-beacon-ring"></div>
+            <div class="user-beacon-ring"></div>
+            <div class="user-beacon-shadow"></div>
+            <div class="user-beacon-avatar"></div>
+          </div>
+        `,
+        iconSize: [48, 56],
+        iconAnchor: [24, 48]
+      });
+
+      LANDMARKS.forEach(lm => {
+        const marker = L.marker([lm.lat, lm.lng], {
+          icon: createLandmarkIcon(lm),
+          zIndexOffset: lm.unlocked ? 500 : 100
+        }).addTo(map);
+
+        marker.on('click', () => showBottomSheet(lm));
+        markersById[lm.id] = marker;
+      });
+
+      updateMarkerProximity();
+    }
+
+    // ── Event listeners ──
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchView(btn.dataset.view));
+    });
+
+    document.getElementById('sheet-backdrop').addEventListener('click', hideBottomSheet);
+    document.getElementById('celebration').addEventListener('click', hideCelebration);
+
+    document.getElementById('header-title').addEventListener('click', () => {
+      headerTapCount++;
+      clearTimeout(headerTapTimer);
+      headerTapTimer = setTimeout(() => { headerTapCount = 0; }, 2000);
+      if (headerTapCount >= 5) {
+        headerTapCount = 0;
+        document.getElementById('debug-btn').classList.add('visible');
+      }
+    });
+
+    document.getElementById('debug-btn').addEventListener('click', toggleDemoMode);
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'd' || e.key === 'D') toggleDemoMode();
+    });
+
+    document.getElementById('teleport-btn').addEventListener('click', teleportToNextLocked);
+
+    // ── Boot ──
+    async function boot() {
+      try {
+        await loadLandmarks();
+      } catch (e) {
+        showGeoBanner('Could not load landmarks — open via a static server');
+        return;
+      }
+      loadUnlocked();
+      initMap();
+      LANDMARKS.forEach(lm => { if (lm.unlocked) restyleMarker(lm.id); });
+      renderCollection();
+      startGeolocation();
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      }
+    }
+
+    boot();
+  </script>
+</body>
+</html>
