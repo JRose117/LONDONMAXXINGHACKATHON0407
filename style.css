@@ -1045,6 +1045,215 @@ nav.tabs {
   opacity: 0.8;
 }
 
+/* Category filter (bottom-right) */
+.filter-fab {
+  position: absolute;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  left: 16px;
+  z-index: 700;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: rgba(15, 15, 19, 0.82);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 50%;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.filter-fab:active { transform: scale(0.94); }
+
+.filter-fab.active {
+  background: rgba(59, 130, 246, 0.9);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+.filter-fab-count {
+  display: none;
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: #3b82f6;
+  border: 2px solid rgba(15, 15, 19, 0.9);
+  border-radius: 999px;
+}
+
+/* Full-screen category filter */
+.filter-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  padding: max(16px, env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
+  opacity: 0;
+  transform: translateY(2%);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.filter-panel.open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.filter-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0 12px;
+  flex-shrink: 0;
+}
+
+.filter-panel-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.filter-close-btn {
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 600;
+  padding: 8px 16px;
+  min-height: 40px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.filter-close-btn:active { opacity: 0.75; }
+
+.filter-panel-sub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 14px;
+  flex-shrink: 0;
+}
+
+.filter-panel-count {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.filter-all-btn {
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 14px;
+  min-height: 38px;
+  background: rgba(59, 130, 246, 0.14);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.filter-all-btn:active { opacity: 0.75; }
+
+.filter-grid {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding-bottom: 8px;
+  align-content: start;
+}
+
+.filter-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 10px;
+  min-height: 116px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  cursor: pointer;
+  text-align: left;
+  color: var(--text-dim);
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.filter-tile:active { transform: scale(0.97); }
+
+.filter-tile.active {
+  color: var(--text);
+  border-color: var(--cat-color);
+  background: color-mix(in srgb, var(--cat-color) 16%, transparent);
+}
+
+.filter-tile-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--cat-color);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--cat-color) 60%, transparent);
+  opacity: 0.45;
+  transition: opacity 0.15s ease;
+}
+
+.filter-tile.active .filter-tile-dot { opacity: 1; }
+
+.filter-tile-name {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.filter-tile-check {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--bg);
+  background: var(--cat-color);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.filter-tile.active .filter-tile-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
 /* Demo controls */
 #debug-btn {
   display: none;

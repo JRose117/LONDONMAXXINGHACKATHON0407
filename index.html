@@ -49,6 +49,24 @@
       </button>
       <input type="file" id="photo-input" accept="image/*" capture="user" hidden>
       <input type="file" id="claim-photo-input" accept="image/*" capture="environment" hidden>
+
+      <div id="filter-panel" class="filter-panel" aria-hidden="true">
+        <div class="filter-panel-header">
+          <span class="filter-panel-title">Filter by category</span>
+          <button type="button" id="filter-close-btn" class="filter-close-btn" aria-label="Done">Done</button>
+        </div>
+        <div class="filter-panel-sub">
+          <span class="filter-panel-count" id="filter-panel-count"></span>
+          <button type="button" id="filter-all-btn" class="filter-all-btn">All</button>
+        </div>
+        <div id="filter-list" class="filter-grid"></div>
+      </div>
+      <button type="button" id="filter-fab" class="filter-fab" aria-label="Filter by category" aria-expanded="false">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 5h16l-6 7v6l-4 2v-8L4 5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+        </svg>
+        <span class="filter-fab-count" id="filter-fab-count"></span>
+      </button>
     </div>
   </div>
 
@@ -108,6 +126,7 @@
     const PROFILE_KEY = 'unlock-london:profile';
     const PHOTO_SKIP_KEY = 'unlock-london:photo-skip';
     const COLLECTION_PHOTOS_KEY = 'unlock-london:collection-photos';
+    const CATEGORY_FILTER_KEY = 'unlock-london:cat-filter';
     const CONFIDENCE_ENDPOINT = 'https://blcbcowiijjtlufordcl.supabase.co/functions/v1/swift-responder';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsY2Jjb3dpaWpqdGx1Zm9yZGNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDk1NzgsImV4cCI6MjA5Nzk4NTU3OH0.QkZMFfpcTDchc0zHyQ0cj0LFm09kxR_hukKoXwiTBrY';
     const CONFIDENCE_THRESHOLD = 7;
@@ -192,6 +211,111 @@
       if (!category) return '';
       const c = getCategoryColor(category);
       return `<span class="category-chip" style="--cat-color:${c}">${category}</span>`;
+    }
+
+    // ── Category filter ──
+    const ALL_CATEGORIES = Object.keys(CATEGORY_COLORS);
+    let activeCategories = new Set(ALL_CATEGORIES);
+
+    function loadCategoryFilter() {
+      try {
+        const raw = localStorage.getItem(CATEGORY_FILTER_KEY);
+        if (raw) {
+          const saved = JSON.parse(raw).filter(c => CATEGORY_COLORS[c]);
+          activeCategories = new Set(saved.length ? saved : ALL_CATEGORIES);
+        }
+      } catch (e) { /* keep default: all */ }
+    }
+
+    function saveCategoryFilter() {
+      try {
+        localStorage.setItem(CATEGORY_FILTER_KEY, JSON.stringify([...activeCategories]));
+      } catch (e) {}
+    }
+
+    function isCategoryActive(category) {
+      return !category || activeCategories.has(category);
+    }
+
+    function applyCategoryFilter() {
+      LANDMARKS.forEach(lm => {
+        const marker = markersById[lm.id];
+        if (!marker) return;
+        marker.getElement().style.display = isCategoryActive(lm.category) ? '' : 'none';
+      });
+      updateFilterFabCount();
+    }
+
+    function updateFilterFabCount() {
+      const badge = document.getElementById('filter-fab-count');
+      if (!badge) return;
+      const n = activeCategories.size;
+      if (n === ALL_CATEGORIES.length) {
+        badge.style.display = 'none';
+      } else {
+        badge.style.display = 'flex';
+        badge.textContent = n;
+      }
+    }
+
+    function toggleCategory(category) {
+      if (activeCategories.has(category)) {
+        activeCategories.delete(category);
+      } else {
+        activeCategories.add(category);
+      }
+      saveCategoryFilter();
+      renderFilterList();
+      applyCategoryFilter();
+    }
+
+    function setAllCategories() {
+      // If everything is already on, "All" clears to none; otherwise select all.
+      if (activeCategories.size === ALL_CATEGORIES.length) {
+        activeCategories = new Set();
+      } else {
+        activeCategories = new Set(ALL_CATEGORIES);
+      }
+      saveCategoryFilter();
+      renderFilterList();
+      applyCategoryFilter();
+    }
+
+    function renderFilterList() {
+      const list = document.getElementById('filter-list');
+      if (!list) return;
+      list.innerHTML = ALL_CATEGORIES.map(cat => {
+        const color = CATEGORY_COLORS[cat];
+        const on = activeCategories.has(cat);
+        return `
+          <button type="button" class="filter-tile${on ? ' active' : ''}" data-category="${cat}" style="--cat-color:${color}">
+            <span class="filter-tile-check" aria-hidden="true">✓</span>
+            <span class="filter-tile-dot"></span>
+            <span class="filter-tile-name">${cat}</span>
+          </button>
+        `;
+      }).join('');
+
+      const allBtn = document.getElementById('filter-all-btn');
+      if (allBtn) allBtn.textContent = activeCategories.size === ALL_CATEGORIES.length ? 'Clear all' : 'Select all';
+
+      const count = document.getElementById('filter-panel-count');
+      if (count) {
+        const n = activeCategories.size;
+        count.textContent = n === ALL_CATEGORIES.length
+          ? 'Showing all categories'
+          : `${n} of ${ALL_CATEGORIES.length} selected`;
+      }
+    }
+
+    function toggleFilterPanel(force) {
+      const panel = document.getElementById('filter-panel');
+      const fab = document.getElementById('filter-fab');
+      const open = force != null ? force : panel.getAttribute('aria-hidden') === 'true';
+      panel.setAttribute('aria-hidden', open ? 'false' : 'true');
+      panel.classList.toggle('open', open);
+      fab.setAttribute('aria-expanded', open ? 'true' : 'false');
+      fab.classList.toggle('active', open);
     }
 
     function haversine(lat1, lng1, lat2, lng2) {
@@ -1411,6 +1535,7 @@
           markersById[lm.id] = createLandmarkMarker(lm);
         });
 
+        applyCategoryFilter();
         updateMarkerProximity();
       });
     }
@@ -1425,7 +1550,7 @@
     document.getElementById('celebration').addEventListener('click', hideCelebration);
 
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') hideLandmarkModal();
+      if (e.key === 'Escape') { hideLandmarkModal(); toggleFilterPanel(false); }
       if (e.key === 'd' || e.key === 'D') toggleDemoMode();
     });
 
@@ -1451,6 +1576,14 @@
     document.getElementById('photo-skip-btn').addEventListener('click', dismissPhotoPrompt);
     document.getElementById('photo-fab').addEventListener('click', openPhotoPicker);
     document.getElementById('change-photo-btn').addEventListener('click', openPhotoPicker);
+
+    document.getElementById('filter-fab').addEventListener('click', () => toggleFilterPanel());
+    document.getElementById('filter-close-btn').addEventListener('click', () => toggleFilterPanel(false));
+    document.getElementById('filter-all-btn').addEventListener('click', setAllCategories);
+    document.getElementById('filter-list').addEventListener('click', e => {
+      const tile = e.target.closest('.filter-tile');
+      if (tile) toggleCategory(tile.dataset.category);
+    });
     document.getElementById('photo-input').addEventListener('change', e => {
       const file = e.target.files?.[0];
       handlePhotoSelected(file);
@@ -1472,6 +1605,8 @@
       }
       loadUnlocked();
       loadProfilePhoto();
+      loadCategoryFilter();
+      renderFilterList();
       initMap();
       LANDMARKS.forEach(lm => { if (lm.unlocked) restyleMarker(lm.id); });
       renderCollection();
