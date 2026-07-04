@@ -1796,6 +1796,222 @@
       );
     }
 
+    // ── 3D trees ──
+    const TREE_CATEGORIES = new Set(['Parks & Gardens', 'Nature Reserves & City Farms']);
+
+    function hashSeed(str) {
+      let h = 2166136261;
+      for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return h >>> 0;
+    }
+
+    function mulberry32(seed) {
+      return function () {
+        seed |= 0;
+        seed = seed + 0x6D2B79F5 | 0;
+        let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+
+    function metersToLngLatOffset(lng, lat, eastM, northM) {
+      const earth = 6378137;
+      const dLat = (northM / earth) * (180 / Math.PI);
+      const dLng = (eastM / (earth * Math.cos(lat * Math.PI / 180))) * (180 / Math.PI);
+      return [lng + dLng, lat + dLat];
+    }
+
+    function circleRing(lng, lat, radiusM, segments = 10) {
+      const ring = [];
+      for (let i = 0; i <= segments; i++) {
+        const a = (i / segments) * Math.PI * 2;
+        ring.push(metersToLngLatOffset(lng, lat, Math.cos(a) * radiusM, Math.sin(a) * radiusM));
+      }
+      return ring;
+    }
+
+    function createTreePair(lng, lat, rng) {
+      const trunkH = 2.4 + rng() * 2.2;
+      const canopyH = 5.5 + rng() * 7;
+      const canopyR = 1.6 + rng() * 2.4;
+      const trunkR = 0.3 + rng() * 0.28;
+
+      return {
+        trunk: {
+          type: 'Feature',
+          properties: { height: trunkH, base: 0 },
+          geometry: { type: 'Polygon', coordinates: [circleRing(lng, lat, trunkR)] }
+        },
+        canopy: {
+          type: 'Feature',
+          properties: { height: trunkH + canopyH, base: trunkH * 0.82 },
+          geometry: { type: 'Polygon', coordinates: [circleRing(lng, lat, canopyR, 12)] }
+        }
+      };
+    }
+
+    function treesNearLandmarks() {
+      const trunks = [];
+      const canopies = [];
+
+      LANDMARKS.forEach(lm => {
+        if (!TREE_CATEGORIES.has(lm.category)) return;
+        const rng = mulberry32(hashSeed(lm.id));
+        const count = 22 + Math.floor(rng() * 20);
+
+        for (let i = 0; i < count; i++) {
+          const angle = rng() * Math.PI * 2;
+          const dist = 8 + rng() * 120;
+          const [lng, lat] = metersToLngLatOffset(
+            lm.lng,
+            lm.lat,
+            Math.cos(angle) * dist,
+            Math.sin(angle) * dist
+          );
+          const tree = createTreePair(lng, lat, rng);
+          trunks.push(tree.trunk);
+          canopies.push(tree.canopy);
+        }
+      });
+
+      return { trunks, canopies };
+    }
+
+    function treesFromGreenPolygons(existingKeys) {
+      const trunks = [];
+      const canopies = [];
+      if (!map.getSource('openmaptiles')) return { trunks, canopies };
+
+      const seen = new Set();
+      const sourceLayers = [
+        { name: 'park', match: () => true },
+        { name: 'landcover', match: f => f.properties?.class === 'wood' }
+      ];
+
+      sourceLayers.forEach(({ name, match }) => {
+        map.querySourceFeatures('openmaptiles', { sourceLayer: name }).forEach(feature => {
+          if (!match(feature)) return;
+
+          const key = feature.id != null
+            ? String(feature.id)
+            : `${name}:${JSON.stringify(feature.properties)}`;
+          if (seen.has(key)) return;
+          seen.add(key);
+
+          const ring = feature.geometry.type === 'Polygon'
+            ? feature.geometry.coordinates[0]
+            : feature.geometry.coordinates?.[0]?.[0];
+          if (!ring?.length) return;
+
+          let minLng = Infinity;
+          let maxLng = -Infinity;
+          let minLat = Infinity;
+          let maxLat = -Infinity;
+          ring.forEach(([lng, lat]) => {
+            minLng = Math.min(minLng, lng);
+            maxLng = Math.max(maxLng, lng);
+            minLat = Math.min(minLat, lat);
+            maxLat = Math.max(maxLat, lat);
+          });
+
+          const centerLng = (minLng + maxLng) / 2;
+          const centerLat = (minLat + maxLat) / 2;
+          const widthM = (maxLng - minLng) * 111320 * Math.cos(centerLat * Math.PI / 180);
+          const heightM = (maxLat - minLat) * 110540;
+          const area = widthM * heightM;
+          if (area < 180) return;
+
+          const count = Math.min(72, Math.max(10, Math.floor(area / 280)));
+          const rng = mulberry32(hashSeed(key));
+
+          for (let i = 0; i < count; i++) {
+            const lng = minLng + rng() * (maxLng - minLng);
+            const lat = minLat + rng() * (maxLat - minLat);
+            const dedupeKey = `${lng.toFixed(5)},${lat.toFixed(5)}`;
+            if (existingKeys.has(dedupeKey)) continue;
+            existingKeys.add(dedupeKey);
+
+            const tree = createTreePair(lng, lat, rng);
+            trunks.push(tree.trunk);
+            canopies.push(tree.canopy);
+          }
+        });
+      });
+
+      return { trunks, canopies };
+    }
+
+    function add3DTrees() {
+      const landmarkTrees = treesNearLandmarks();
+      const treeKeys = new Set();
+
+      landmarkTrees.trunks.forEach(f => {
+        const [lng, lat] = f.geometry.coordinates[0][0];
+        treeKeys.add(`${lng.toFixed(5)},${lat.toFixed(5)}`);
+      });
+
+      map.addSource('trees-trunks', {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: landmarkTrees.trunks }
+      });
+
+      map.addSource('trees-canopies', {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: landmarkTrees.canopies }
+      });
+
+      map.addLayer({
+        id: 'trees-trunks',
+        type: 'fill-extrusion',
+        source: 'trees-trunks',
+        minzoom: 14,
+        paint: {
+          'fill-extrusion-color': '#6b5344',
+          'fill-extrusion-height': ['get', 'height'],
+          'fill-extrusion-base': ['get', 'base'],
+          'fill-extrusion-opacity': 0.96
+        }
+      });
+
+      map.addLayer({
+        id: 'trees-canopies',
+        type: 'fill-extrusion',
+        source: 'trees-canopies',
+        minzoom: 14,
+        paint: {
+          'fill-extrusion-color': [
+            'interpolate',
+            ['linear'],
+            ['get', 'height'],
+            8, '#2f6b3a',
+            14, '#4a9456',
+            20, '#6bb378'
+          ],
+          'fill-extrusion-height': ['get', 'height'],
+          'fill-extrusion-base': ['get', 'base'],
+          'fill-extrusion-opacity': 0.9
+        }
+      });
+
+      map.once('idle', () => {
+        const extra = treesFromGreenPolygons(treeKeys);
+        if (!extra.trunks.length) return;
+
+        map.getSource('trees-trunks').setData({
+          type: 'FeatureCollection',
+          features: landmarkTrees.trunks.concat(extra.trunks)
+        });
+        map.getSource('trees-canopies').setData({
+          type: 'FeatureCollection',
+          features: landmarkTrees.canopies.concat(extra.canopies)
+        });
+      });
+    }
+
     // ── Map init ──
     function hideMapClutter() {
       if (!map) return;
@@ -1833,6 +2049,7 @@
 
       map.on('load', () => {
         hideMapClutter();
+        add3DTrees();
 
         map.addSource('fuzz-radius', {
           type: 'geojson',
