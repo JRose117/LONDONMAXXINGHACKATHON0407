@@ -101,6 +101,12 @@
         <h3 class="settings-section-title">Profile</h3>
         <button type="button" id="change-photo-btn" class="settings-btn">Change profile photo</button>
       </section>
+      <section class="settings-section" id="install-section" hidden>
+        <h3 class="settings-section-title">Install app</h3>
+        <p class="settings-section-desc" id="install-desc">Add Unlock London to your home screen for quick access.</p>
+        <button type="button" id="install-btn" class="settings-btn" hidden>Install app</button>
+        <p class="settings-notif-status" id="install-status"></p>
+      </section>
       <section class="settings-section">
         <h3 class="settings-section-title">Notifications</h3>
         <p class="settings-section-desc" id="notif-desc">Get alerted when you're near an uncollected landmark. On iPhone, install the app to your Home Screen first — browser tabs can't send alerts.</p>
@@ -915,6 +921,49 @@
       return window.navigator.standalone === true ||
         window.matchMedia('(display-mode: standalone)').matches ||
         window.matchMedia('(display-mode: fullscreen)').matches;
+    }
+
+    let deferredInstallPrompt = null;
+
+    function syncInstallUI() {
+      const section = document.getElementById('install-section');
+      const btn = document.getElementById('install-btn');
+      const desc = document.getElementById('install-desc');
+      const status = document.getElementById('install-status');
+      if (!section) return;
+
+      if (isInstalledPwa()) {
+        section.hidden = true;
+        return;
+      }
+
+      section.hidden = false;
+
+      if (deferredInstallPrompt) {
+        btn.hidden = false;
+        desc.textContent = 'Install Unlock London on your device for quick access from your home screen or app drawer.';
+        status.textContent = '';
+        return;
+      }
+
+      btn.hidden = true;
+
+      if (isIOSDevice()) {
+        desc.textContent = 'Tap Share in Safari, then Add to Home Screen. Open the app from there for proximity alerts.';
+        status.textContent = '';
+        return;
+      }
+
+      desc.textContent = 'Install is available in Chrome or Edge when the app is served over HTTPS.';
+      status.textContent = '';
+    }
+
+    async function promptInstall() {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      syncInstallUI();
     }
 
     function notificationsApiAvailable() {
@@ -1878,6 +1927,20 @@
     });
     document.getElementById('reset-btn').addEventListener('click', resetProgress);
     document.getElementById('collection-reset-btn').addEventListener('click', resetProgress);
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      syncInstallUI();
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      syncInstallUI();
+    });
+
+    window.matchMedia('(display-mode: standalone)').addEventListener('change', syncInstallUI);
+
+    document.getElementById('install-btn').addEventListener('click', promptInstall);
     document.getElementById('notif-toggle').addEventListener('change', async e => {
       const want = e.target.checked;
       if (want) {
@@ -1925,6 +1988,7 @@
       loadUnlocked();
       loadProfilePhoto();
       loadNotificationPref();
+      syncInstallUI();
       loadCategoryFilter();
       renderFilterList();
       initMap();
