@@ -53,3 +53,25 @@ self.addEventListener('fetch', event => {
     caches.match(req).then(cached => cached || fetch(req))
   );
 });
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const { landmarkId, tier } = event.notification.data || {};
+  const url = new URL('./index.html', self.location.origin);
+  if (landmarkId) {
+    url.searchParams.set('landmark', landmarkId);
+    if (tier) url.searchParams.set('notif', tier);
+  }
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+      for (const client of windowClients) {
+        if (client.url.startsWith(self.location.origin) && 'focus' in client) {
+          client.postMessage({ type: 'NOTIFICATION_CLICK', landmarkId, tier });
+          return client.focus();
+        }
+      }
+      return clients.openWindow(url.toString());
+    })
+  );
+});
