@@ -6,9 +6,6 @@
   <meta name="theme-color" content="#0f0f13">
   <title>Unlock London</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" crossorigin="">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@32.3.3/styles/ag-grid.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@32.3.3/styles/ag-theme-alpine.min.css">
@@ -24,7 +21,6 @@
     <nav class="tabs" aria-label="Main navigation">
       <button class="tab-btn active" data-view="map">Map</button>
       <button class="tab-btn" data-view="collection">Collection</button>
-      <button class="tab-btn" data-view="settings">Settings</button>
     </nav>
   </header>
 
@@ -33,12 +29,10 @@
   <div id="view-map" class="view active">
     <div class="map-stage">
       <div id="map"></div>
-      <div class="map-horizon"></div>
       <div class="map-vignette"></div>
-      <div class="map-scan"></div>
       <div id="geo-prompt" class="geo-prompt visible">
         <p class="geo-prompt-text" id="geo-prompt-text">Share your location to find landmarks near you.</p>
-        <button type="button" id="geo-enable-btn" class="geo-enable-btn">ENABLE LOCATION</button>
+        <button type="button" id="geo-enable-btn" class="geo-enable-btn">Enable location</button>
         <p class="geo-prompt-hint" id="geo-prompt-hint"></p>
       </div>
       <div id="photo-prompt" class="photo-prompt">
@@ -93,7 +87,6 @@
   </div>
 
   <div id="celebration">
-    <div class="celebration-rays"></div>
     <div class="celebration-scene" id="celebration-scene">
       <div class="celebration-card" id="celebration-card"></div>
     </div>
@@ -219,6 +212,16 @@
     function getMarkerCoords(lm) {
       if (lm.unlocked) return { lat: lm.lat, lng: lm.lng };
       return { lat: lm.displayLat, lng: lm.displayLng };
+    }
+
+    function getLandmarkDistanceM(lm) {
+      if (!userPos) return null;
+      return haversine(userPos.lat, userPos.lng, lm.lat, lm.lng);
+    }
+
+    function getCollectionDistanceLabel(distanceM) {
+      if (distanceM == null) return '—';
+      return formatDistance(distanceM);
     }
 
     async function loadLandmarks() {
@@ -362,11 +365,7 @@
         <div class="poi-pin ${cls}" style="--ring-color:${color}">
           ${glowHtml}
           <div class="poi-ring"></div>
-          <div class="poi-shadow"></div>
-          <div class="poi-stem"></div>
-          <div class="poi-disc-wrap">
-            <div class="poi-disc" style="background:${discBg}">${displayIcon}</div>
-          </div>
+          <div class="poi-disc" style="background:${discBg}">${displayIcon}</div>
         </div>
       `;
     }
@@ -387,7 +386,7 @@
 
       const coords = getMarkerCoords(landmark);
 
-      return new maplibregl.Marker({ element: el, anchor: 'bottom' })
+      return new maplibregl.Marker({ element: el, anchor: 'center' })
         .setLngLat([coords.lng, coords.lat])
         .addTo(map);
     }
@@ -412,10 +411,6 @@
           <div class="user-beacon-photo${profilePhotoUrl ? '' : ' user-beacon-photo--empty'}">
             ${photoInner}
           </div>
-          <div class="user-beacon-ring"></div>
-          <div class="user-beacon-ring"></div>
-          <div class="user-beacon-shadow"></div>
-          <div class="user-beacon-avatar"></div>
         </div>
       `;
     }
@@ -847,7 +842,7 @@
       userPos = { lat, lng };
 
       if (!userMarker && map) {
-        userMarker = new maplibregl.Marker({ element: createUserMarkerEl(), anchor: 'bottom' })
+        userMarker = new maplibregl.Marker({ element: createUserMarkerEl(), anchor: 'center' })
           .setLngLat([lng, lat])
           .addTo(map);
       } else if (userMarker) {
@@ -857,9 +852,7 @@
       updateUnlockCircle(lat, lng);
       updateMarkerProximity();
 
-      if (currentView === 'collection' && collectionGridApi) {
-        collectionGridApi.setGridOption('rowData', getCollectionRowData());
-      }
+      refreshCollectionDistances();
 
       if (centerMap) flyToUser(lat, lng);
     }
@@ -880,16 +873,13 @@
 
       card.className = 'celebration-card rarity-' + landmark.rarity;
       card.innerHTML = `
-        <div class="celebration-sparkles">${Array.from({ length: 8 }, (_, i) =>
-          `<span class="sparkle" style="top:${10 + Math.random() * 80}%;left:${5 + Math.random() * 90}%;animation-delay:${i * 0.08}s;background:${color}"></span>`
-        ).join('')}</div>
-        <div class="celebration-label">COLLECTED!</div>
-        <div style="font-size:36px;margin:8px 0">${POI_ICONS[landmark.id] || '📍'}</div>
+        <div class="celebration-icon">${POI_ICONS[landmark.id] || '📍'}</div>
+        <div class="celebration-label">Collected</div>
         <div class="card-name">${landmark.name}</div>
         <span class="rarity-badge ${landmark.rarity}">${landmark.rarity}</span>
         ${confText}
         <p class="card-flavour">${landmark.flavour}</p>
-        <div class="celebration-hint">tap to dismiss</div>
+        <div class="celebration-hint">Tap to dismiss</div>
       `;
       overlay.classList.add('open');
       clearTimeout(celebrationTimer);
@@ -982,24 +972,25 @@
     // ── Collection ──
     function getCollectionRowData() {
       return LANDMARKS
-        .map((lm, index) => ({ lm, index }))
+        .map((lm, index) => ({
+          lm,
+          index,
+          distanceM: getLandmarkDistanceM(lm)
+        }))
         .sort((a, b) => {
-          if (a.lm.unlocked !== b.lm.unlocked) return b.lm.unlocked - a.lm.unlocked;
+          if (a.distanceM == null && b.distanceM == null) return a.index - b.index;
+          if (a.distanceM == null) return 1;
+          if (b.distanceM == null) return -1;
+          if (a.distanceM !== b.distanceM) return a.distanceM - b.distanceM;
           return a.index - b.index;
         })
-        .map(({ lm }) => {
-          const distanceM = userPos
-            ? haversine(userPos.lat, userPos.lng, lm.lat, lm.lng)
-            : null;
-
-          return {
-            id: lm.id,
-            name: lm.unlocked ? lm.name : 'Unknown landmark',
-            distance: distanceM != null ? formatDistance(distanceM) : '—',
-            distanceM,
-            unlocked: lm.unlocked
-          };
-        });
+        .map(({ lm, distanceM }) => ({
+          id: lm.id,
+          name: lm.unlocked ? lm.name : 'Unknown landmark',
+          distance: getCollectionDistanceLabel(distanceM),
+          distanceM,
+          unlocked: lm.unlocked
+        }));
     }
 
     function initCollectionGrid() {
@@ -1018,12 +1009,16 @@
             })
           },
           {
-            field: 'distanceM',
+            colId: 'distance',
             headerName: 'Distance',
-            width: 100,
-            maxWidth: 110,
-            valueFormatter: params => params.data.distance,
-            comparator: (a, b) => {
+            sort: 'asc',
+            width: 120,
+            minWidth: 88,
+            maxWidth: 140,
+            valueGetter: params => params.data?.distance ?? '—',
+            comparator: (_a, _b, nodeA, nodeB) => {
+              const a = nodeA.data?.distanceM;
+              const b = nodeB.data?.distanceM;
               if (a == null && b == null) return 0;
               if (a == null) return 1;
               if (b == null) return -1;
@@ -1061,6 +1056,11 @@
       });
     }
 
+    function refreshCollectionDistances() {
+      if (!collectionGridApi) return;
+      collectionGridApi.setGridOption('rowData', getCollectionRowData());
+    }
+
     function renderCollection() {
       const unlockedCount = LANDMARKS.filter(l => l.unlocked).length;
       document.getElementById('progress-counter').textContent =
@@ -1068,11 +1068,11 @@
 
       if (!collectionGridApi) {
         initCollectionGrid();
-        return;
+      } else {
+        refreshCollectionDistances();
       }
 
-      collectionGridApi.setGridOption('rowData', getCollectionRowData());
-      collectionGridApi.sizeColumnsToFit();
+      collectionGridApi?.sizeColumnsToFit();
     }
 
     // ── View toggle ──
