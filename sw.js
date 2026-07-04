@@ -1,4 +1,4 @@
-const CACHE_NAME = 'unlock-london-v14';
+const CACHE_NAME = 'unlock-london-v15';
 const SHELL = [
   './',
   './index.html',

@@ -296,7 +296,10 @@ nav.tabs {
 .poi-pin.locked .poi-disc {
   background: #4b5563 !important;
   filter: none;
-  opacity: 0.75;
+  opacity: 0.95;
+  border-width: 3px;
+  border-color: var(--cat-color, #fff);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), 0 0 7px var(--cat-color, transparent);
 }
 
 .poi-ring {
@@ -335,6 +338,8 @@ nav.tabs {
   line-height: 1;
   filter: none;
   opacity: 1;
+  /* Gold alert pin: drop the pastel category border. */
+  border: 2px solid #fff;
   animation: poiAlertBounce 1s ease-in-out infinite;
   box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.45), 0 0 16px rgba(245, 158, 11, 0.35), 0 2px 8px rgba(0, 0, 0, 0.2);
 }
@@ -695,6 +700,43 @@ nav.tabs {
   border-radius: 999px;
   border: 1px solid transparent;
   margin-bottom: 8px;
+}
+
+.sheet-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.sheet-badges .rarity-badge,
+.sheet-badges .landmark-modal-rarity {
+  margin-bottom: 0;
+}
+
+.category-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 3px 9px 3px 8px;
+  border-radius: 999px;
+  color: var(--cat-color, #cbd5e1);
+  background: color-mix(in srgb, var(--cat-color, #cbd5e1) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cat-color, #cbd5e1) 40%, transparent);
+}
+
+.category-chip::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cat-color, #cbd5e1);
 }
 
 .rarity-badge.common { background: rgba(156, 163, 175, 0.15); color: var(--common); border-color: rgba(156, 163, 175, 0.3); }

@@ -145,6 +145,21 @@
       legendary: '#f59e0b'
     };
 
+    // Soft pastel border colour per landmark category (for locked "?" pins).
+    const CATEGORY_COLORS = {
+      'Landmarks & Monuments': '#A7C7E7',        // soft blue
+      'Places of Worship': '#C3B1E1',            // lavender
+      'Markets & Shopping': '#FFB5A7',           // coral
+      'Parks & Gardens': '#A8E6A3',              // mint
+      'Theatres & Music Venues': '#F7A8C4',      // pink
+      'Historic Buildings & Palaces': '#F5D491', // gold
+      'Waterways & Public Art': '#9FE2E0',       // aqua
+      'Nature Reserves & City Farms': '#CDE88B', // lime
+      'Museums & Galleries': '#FFCBA4',          // peach
+      'Sports & Leisure Venues': '#FCE38A'       // pastel yellow
+    };
+    const CATEGORY_FALLBACK = '#CBD5E1';
+
     const POI_ICONS = {
       'tower-bridge': '🌉',
       'st-pauls': '⛪',
@@ -189,6 +204,16 @@
     // ── Helpers ──
     function getRarityColor(rarity) {
       return RARITY_COLORS[rarity] || RARITY_COLORS.common;
+    }
+
+    function getCategoryColor(category) {
+      return CATEGORY_COLORS[category] || CATEGORY_FALLBACK;
+    }
+
+    function categoryChipHtml(category) {
+      if (!category) return '';
+      const c = getCategoryColor(category);
+      return `<span class="category-chip" style="--cat-color:${c}">${category}</span>`;
     }
 
     function haversine(lat1, lng1, lat2, lng2) {
@@ -404,8 +429,10 @@
         ? `<div class="poi-glow" style="background:${color}"></div>`
         : '';
 
+      const catColor = getCategoryColor(landmark.category);
+
       return `
-        <div class="poi-pin ${cls}" style="--ring-color:${color}">
+        <div class="poi-pin ${cls}" style="--ring-color:${color};--cat-color:${catColor}">
           ${glowHtml}
           <div class="poi-ring"></div>
           <div class="poi-disc" style="background:${discBg}">${displayIcon}</div>
@@ -1171,7 +1198,10 @@
         html += `
           <div class="sheet-poi-icon">${POI_ICONS[landmark.id] || '📍'}</div>
           <div class="card-name">${landmark.name}</div>
-          <span class="rarity-badge ${landmark.rarity}">${landmark.rarity}</span>
+          <div class="sheet-badges">
+            <span class="rarity-badge ${landmark.rarity}">${landmark.rarity}</span>
+            ${categoryChipHtml(landmark.category)}
+          </div>
           <p class="card-flavour">${landmark.flavour}</p>
         `;
       } else {
@@ -1183,6 +1213,7 @@
         html += `
           <div class="sheet-poi-icon">?</div>
           <div class="card-name">${landmark.name}</div>
+          ${categoryChipHtml(landmark.category)}
           <p class="sheet-locked-msg">??? — explore the area to unlock</p>
           <div class="sheet-distance">${distText}</div>
         `;
@@ -1219,7 +1250,10 @@
         </button>
         <div class="landmark-modal-icon" style="--rarity-color:${color}">${icon}</div>
         <h3 class="landmark-modal-name">${landmark.name}</h3>
-        <span class="landmark-modal-rarity" style="color:${color};border-color:${color}40;background:${color}18">${rarityLabel}</span>
+        <div class="sheet-badges">
+          <span class="landmark-modal-rarity" style="color:${color};border-color:${color}40;background:${color}18">${rarityLabel}</span>
+          ${categoryChipHtml(landmark.category)}
+        </div>
         ${proofHtml}
         <p class="landmark-modal-desc">${landmark.flavour}</p>
         <div class="landmark-modal-status">
