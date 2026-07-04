@@ -32,6 +32,11 @@
       <div id="map"></div>
       <div class="map-vignette"></div>
       <div class="map-scan"></div>
+      <div id="geo-prompt" class="geo-prompt visible">
+        <p class="geo-prompt-text" id="geo-prompt-text">Share your location to find landmarks near you.</p>
+        <button type="button" id="geo-enable-btn" class="geo-enable-btn">ENABLE LOCATION</button>
+        <p class="geo-prompt-hint" id="geo-prompt-hint"></p>
+      </div>
     </div>
   </div>
 
@@ -409,11 +414,12 @@
       document.getElementById('demo-badge').classList.toggle('visible', demoMode);
       document.getElementById('teleport-btn').classList.toggle('visible', demoMode);
 
-      if (!demoMode && navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          pos => handleGeoPosition(pos, { centerMap: !hasLocatedUser }),
-          () => {},
-          { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
+      if (demoMode) {
+        hideGeoPrompt();
+      } else if (!hasLocatedUser) {
+        showGeoPrompt(
+          'Share your location',
+          'Tap the button below to find landmarks near you.'
         );
       }
     }
@@ -440,27 +446,60 @@
     }
 
     // ── Geolocation ──
+    const GEO_OPTIONS = { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 };
+
     function showGeoBanner(msg) {
       const banner = document.getElementById('geo-banner');
       banner.textContent = msg;
       banner.classList.add('visible');
     }
 
-    function handleGeoError(err) {
+    function showGeoPrompt(message, hint, buttonLabel = 'ENABLE LOCATION') {
+      const prompt = document.getElementById('geo-prompt');
+      const btn = document.getElementById('geo-enable-btn');
+      document.getElementById('geo-prompt-text').textContent = message;
+      document.getElementById('geo-prompt-hint').textContent = hint || '';
+      btn.disabled = false;
+      btn.textContent = buttonLabel;
+      prompt.classList.add('visible');
+    }
+
+    function hideGeoPrompt() {
+      document.getElementById('geo-prompt').classList.remove('visible');
+      document.getElementById('geo-banner').classList.remove('visible');
+      const btn = document.getElementById('geo-enable-btn');
+      btn.disabled = false;
+      btn.textContent = 'ENABLE LOCATION';
+    }
+
+    function handleGeoError(err, { fromPrompt = false } = {}) {
       if (demoMode) return;
+
+      let message;
+      let hint;
+
       if (err.code === 1) {
-        showGeoBanner('Location blocked — allow access in browser settings');
+        message = 'Location access denied';
+        hint = 'Tap Try Again. In Safari: tap aA in the address bar → Website Settings → Location → Allow.';
       } else if (err.code === 3) {
-        showGeoBanner('Location timed out — check GPS is enabled');
+        message = 'Location timed out';
+        hint = 'Check Location Services are on, then tap Try Again.';
       } else {
-        showGeoBanner('Location unavailable — try demo mode (press D)');
+        message = 'Could not get location';
+        hint = 'Tap Try Again. For testing away from London, press D for demo mode.';
+      }
+
+      if (fromPrompt || !hasLocatedUser) {
+        showGeoPrompt(message, hint, 'TRY AGAIN');
+      } else {
+        showGeoBanner(message + ' — ' + hint);
       }
     }
 
     function handleGeoPosition(pos, { centerMap = false } = {}) {
       if (demoMode) return;
 
-      document.getElementById('geo-banner').classList.remove('visible');
+      hideGeoPrompt();
 
       const lat = pos.coords.latitude;
       const lng = pos.coords.longitude;
@@ -470,29 +509,49 @@
       hasLocatedUser = true;
     }
 
-    function startGeolocation() {
+    function startGeolocationWatch() {
+      if (!navigator.geolocation || demoMode) return;
+      if (geoWatchId != null) navigator.geolocation.clearWatch(geoWatchId);
+      geoWatchId = navigator.geolocation.watchPosition(
+        pos => handleGeoPosition(pos),
+        err => handleGeoError(err),
+        GEO_OPTIONS
+      );
+    }
+
+    function requestUserLocation({ centerMap = true } = {}) {
+      if (demoMode) return;
+
       if (!navigator.geolocation) {
-        showGeoBanner('Location unavailable — try demo mode');
+        showGeoPrompt('Location unavailable', 'Your browser does not support geolocation. Press D for demo mode.');
         return;
       }
 
       if (!window.isSecureContext) {
-        showGeoBanner('Location requires HTTPS or localhost');
+        showGeoPrompt('Secure connection required', 'Open this app via HTTPS or localhost.');
         return;
       }
 
-      const geoOptions = { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 };
+      const btn = document.getElementById('geo-enable-btn');
+      btn.disabled = true;
+      btn.textContent = 'LOCATING...';
 
       navigator.geolocation.getCurrentPosition(
-        pos => handleGeoPosition(pos, { centerMap: true }),
-        handleGeoError,
-        geoOptions
+        pos => {
+          handleGeoPosition(pos, { centerMap });
+          startGeolocationWatch();
+        },
+        err => {
+          handleGeoError(err, { fromPrompt: true });
+        },
+        GEO_OPTIONS
       );
+    }
 
-      geoWatchId = navigator.geolocation.watchPosition(
-        pos => handleGeoPosition(pos),
-        handleGeoError,
-        geoOptions
+    function initGeolocation() {
+      showGeoPrompt(
+        'Share your location',
+        'Tap the button below — Safari requires a tap to show the permission prompt.'
       );
     }
 
@@ -558,6 +617,9 @@
     });
 
     document.getElementById('teleport-btn').addEventListener('click', teleportToNextLocked);
+    document.getElementById('geo-enable-btn').addEventListener('click', () => {
+      requestUserLocation({ centerMap: true });
+    });
 
     // ── Boot ──
     async function boot() {
@@ -571,7 +633,7 @@
       initMap();
       LANDMARKS.forEach(lm => { if (lm.unlocked) restyleMarker(lm.id); });
       renderCollection();
-      startGeolocation();
+      initGeolocation();
 
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js').catch(() => {});
