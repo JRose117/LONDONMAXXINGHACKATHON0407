@@ -54,15 +54,19 @@
         </svg>
       </button>
       <input type="file" id="photo-input" accept="image/*" capture="user" hidden>
+      <input type="file" id="claim-photo-input" accept="image/*" capture="environment" hidden>
     </div>
   </div>
 
   <div id="view-collection" class="view">
     <div class="collection-header">
       <h2>Collection</h2>
-      <div class="progress-counter" id="progress-counter">0 / 10 unlocked</div>
+      <div class="progress-counter" id="progress-counter">0 / 10 collected</div>
     </div>
     <div id="collection-grid" class="ag-theme-alpine-dark collection-grid"></div>
+    <div class="collection-footer">
+      <button type="button" id="collection-reset-btn" class="collection-reset-btn">Reset collection</button>
+    </div>
   </div>
 
   <div id="view-settings" class="view">
@@ -110,6 +114,10 @@
     const STORAGE_KEY = 'unlock-london:v1';
     const PROFILE_KEY = 'unlock-london:profile';
     const PHOTO_SKIP_KEY = 'unlock-london:photo-skip';
+    const COLLECTION_PHOTOS_KEY = 'unlock-london:collection-photos';
+    const CONFIDENCE_ENDPOINT = 'https://blcbcowiijjtlufordcl.supabase.co/functions/v1/swift-responder';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsY2Jjb3dpaWpqdGx1Zm9yZGNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDk1NzgsImV4cCI6MjA5Nzk4NTU3OH0.QkZMFfpcTDchc0zHyQ0cj0LFm09kxR_hukKoXwiTBrY';
+    const CONFIDENCE_THRESHOLD = 7;
     const UNLOCK_RADIUS_M = 100;
     const FUZZ_MIN_M = 55;
     const FUZZ_MAX_M = 165;
@@ -157,6 +165,8 @@
     let orientationHandler = null;
     const markersById = {};
     const claimableIds = new Set();
+    let pendingClaimLandmarkId = null;
+    let claimInProgress = false;
     let geoWatchId = null;
     let hasLocatedUser = false;
     let collectionGridApi = null;
@@ -219,21 +229,61 @@
     }
 
     function loadUnlocked() {
+      const photos = loadCollectionPhotos();
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
           const ids = JSON.parse(raw);
           ids.forEach(id => {
             const lm = getLandmark(id);
-            if (lm) lm.unlocked = true;
+            if (lm) {
+              lm.unlocked = true;
+              applyCollectionPhoto(lm, photos[id]);
+            }
           });
         }
       } catch (e) {
         useMemoryStorage = true;
         memoryUnlockedIds.forEach(id => {
           const lm = getLandmark(id);
-          if (lm) lm.unlocked = true;
+          if (lm) {
+            lm.unlocked = true;
+            applyCollectionPhoto(lm, photos[id]);
+          }
         });
+      }
+    }
+
+    function loadCollectionPhotos() {
+      try {
+        const raw = localStorage.getItem(COLLECTION_PHOTOS_KEY);
+        return raw ? JSON.parse(raw) : {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function applyCollectionPhoto(lm, entry) {
+      if (!entry) return;
+      lm.proofPhoto = entry.photoUrl;
+      lm.proofResult = {
+        confidence: entry.confidence,
+        explanation: entry.explanation
+      };
+    }
+
+    function saveCollectionPhoto(id, photoUrl, result) {
+      try {
+        const photos = loadCollectionPhotos();
+        photos[id] = {
+          photoUrl,
+          confidence: result.confidence,
+          explanation: result.explanation,
+          collectedAt: Date.now()
+        };
+        localStorage.setItem(COLLECTION_PHOTOS_KEY, JSON.stringify(photos));
+      } catch (e) {
+        // Storage full — photo still shown this session via landmark object
       }
     }
 
@@ -252,13 +302,18 @@
     }
 
     function resetProgress() {
-      if (!confirm('Reset all unlocked landmarks? You will start from scratch.')) return;
+      if (!confirm('Reset your entire collection? All collected landmarks and photos will be cleared.')) return;
 
-      LANDMARKS.forEach(lm => { lm.unlocked = false; });
+      LANDMARKS.forEach(lm => {
+        lm.unlocked = false;
+        delete lm.proofPhoto;
+        delete lm.proofResult;
+      });
       memoryUnlockedIds.clear();
 
       try {
         localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(COLLECTION_PHOTOS_KEY);
       } catch (e) {
         useMemoryStorage = true;
       }
@@ -324,7 +379,7 @@
         e.stopPropagation();
         if (isClaimable(landmark)) {
           if (navigator.vibrate) navigator.vibrate(30);
-          unlockLandmark(landmark.id);
+          startLandmarkClaim(landmark);
         } else {
           showBottomSheet(landmark);
         }
@@ -601,21 +656,191 @@
     }
 
     // ── Claim pipeline ──
-    // Landmarks in range are not auto-unlocked — they become "claimable"
-    // (gold pulsing pin) and the user taps the pin to unlock them.
+    // Landmarks in range become "claimable" — user must photo-verify to collect.
     function onLandmarkClaimable(lm) {
       if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
     }
 
-    function unlockLandmark(id) {
+    function compressClaimPhoto(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = e => {
+          const img = new Image();
+          img.onerror = reject;
+          img.onload = () => {
+            const maxSize = 512;
+            const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+            const w = Math.round(img.width * scale);
+            const h = Math.round(img.height * scale);
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', 0.82));
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function verifyLandmarkPhoto(landmark, file) {
+      if (!SUPABASE_ANON_KEY) {
+        throw new Error('Set SUPABASE_ANON_KEY in index.html (Supabase dashboard → Project Settings → API)');
+      }
+
+      const fd = new FormData();
+      fd.append('place', landmark.name);
+      fd.append('image', file);
+
+      const headers = {};
+      if (SUPABASE_ANON_KEY) {
+        headers.authorization = `Bearer ${SUPABASE_ANON_KEY}`;
+        headers.apikey = SUPABASE_ANON_KEY;
+      }
+
+      const res = await fetch(CONFIDENCE_ENDPOINT, {
+        method: 'POST',
+        headers,
+        body: fd
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const detail = typeof data.details === 'string'
+          ? data.details
+          : data.details ? JSON.stringify(data.details) : '';
+        throw new Error(data.error || detail || 'Verification failed');
+      }
+      return data;
+    }
+
+    function startLandmarkClaim(landmark) {
+      if (claimInProgress) return;
+      pendingClaimLandmarkId = landmark.id;
+      showClaimSheet(landmark);
+    }
+
+    function openClaimPhotoPicker() {
+      document.getElementById('claim-photo-input').click();
+    }
+
+    function showClaimSheet(landmark, { state = 'ready', message = '', result = null } = {}) {
+      const sheet = document.getElementById('bottom-sheet');
+      const content = document.getElementById('sheet-content');
+      const color = getRarityColor(landmark.rarity);
+      let body = '';
+
+      if (state === 'loading') {
+        body = `
+          <p class="sheet-claim-msg">Checking your photo…</p>
+          <div class="sheet-claim-spinner" aria-hidden="true"></div>
+        `;
+      } else if (state === 'failure') {
+        const conf = result?.confidence ?? '?';
+        body = `
+          <p class="sheet-claim-msg sheet-claim-msg--fail">Couldn't verify this spot</p>
+          <p class="sheet-claim-detail">Confidence: ${conf}/10 — ${result?.explanation || message || 'Try a clearer photo of the landmark.'}</p>
+          <button type="button" class="sheet-claim-btn" id="claim-retry-btn">Try again</button>
+        `;
+      } else if (state === 'error') {
+        body = `
+          <p class="sheet-claim-msg sheet-claim-msg--fail">Something went wrong</p>
+          <p class="sheet-claim-detail">${message || 'Please try again.'}</p>
+          <button type="button" class="sheet-claim-btn" id="claim-retry-btn">Try again</button>
+        `;
+      } else {
+        body = `
+          <p class="sheet-claim-msg">You're in range — take a photo to collect this place</p>
+          <p class="sheet-claim-hint">Point your camera at ${landmark.name} so we can verify you're really there.</p>
+          <button type="button" class="sheet-claim-btn" id="claim-photo-btn">Take photo</button>
+        `;
+      }
+
+      content.innerHTML = `
+        <button class="sheet-close" id="sheet-close">X</button>
+        <div class="sheet-poi-icon">${POI_ICONS[landmark.id] || '📍'}</div>
+        <div class="card-name">${landmark.name}</div>
+        <span class="rarity-badge ${landmark.rarity}" style="--ring-color:${color}">${landmark.rarity}</span>
+        ${body}
+      `;
+      sheet.classList.add('open');
+
+      document.getElementById('sheet-close').addEventListener('click', () => {
+        if (!claimInProgress) {
+          pendingClaimLandmarkId = null;
+          hideBottomSheet();
+        }
+      });
+
+      const photoBtn = document.getElementById('claim-photo-btn');
+      if (photoBtn) photoBtn.addEventListener('click', openClaimPhotoPicker);
+
+      const retryBtn = document.getElementById('claim-retry-btn');
+      if (retryBtn) retryBtn.addEventListener('click', openClaimPhotoPicker);
+    }
+
+    async function handleClaimPhotoSelected(file) {
+      const landmark = getLandmark(pendingClaimLandmarkId);
+      if (!landmark || !file || !file.type.startsWith('image/')) return;
+      if (!isClaimable(landmark) && !demoMode) {
+        alert('You moved out of range — get closer to collect this place.');
+        pendingClaimLandmarkId = null;
+        hideBottomSheet();
+        return;
+      }
+
+      claimInProgress = true;
+      showClaimSheet(landmark, { state: 'loading' });
+
+      try {
+        let result;
+        let photoUrl;
+
+        if (demoMode) {
+          photoUrl = await compressClaimPhoto(file);
+          result = { confidence: 10, explanation: 'Demo mode — auto-verified.' };
+        } else {
+          [result, photoUrl] = await Promise.all([
+            verifyLandmarkPhoto(landmark, file),
+            compressClaimPhoto(file)
+          ]);
+        }
+
+        if (result.confidence >= CONFIDENCE_THRESHOLD) {
+          unlockLandmarkWithPhoto(landmark.id, photoUrl, result);
+        } else {
+          showClaimSheet(landmark, { state: 'failure', result });
+        }
+      } catch (e) {
+        showClaimSheet(landmark, { state: 'error', message: e.message });
+      } finally {
+        claimInProgress = false;
+      }
+    }
+
+    function unlockLandmarkWithPhoto(id, photoUrl, result) {
       const landmark = getLandmark(id);
       if (!landmark || landmark.unlocked) return;
 
       landmark.unlocked = true;
+      landmark.proofPhoto = photoUrl;
+      landmark.proofResult = result;
+
       saveUnlocked(id);
+      saveCollectionPhoto(id, photoUrl, result);
       restyleMarker(id);
-      showCelebration(landmark);
+      hideBottomSheet();
+      pendingClaimLandmarkId = null;
+      showCelebration(landmark, result);
       renderCollection();
+    }
+
+    function unlockLandmark(id) {
+      // Legacy path — collection now requires photo verification.
+      const landmark = getLandmark(id);
+      if (landmark) startLandmarkClaim(landmark);
     }
 
     function updateUserPosition(lat, lng, { centerMap = false } = {}) {
@@ -640,11 +865,14 @@
     }
 
     // ── Celebration ──
-    function showCelebration(landmark) {
+    function showCelebration(landmark, result) {
       const overlay = document.getElementById('celebration');
       const scene = document.getElementById('celebration-scene');
       const card = document.getElementById('celebration-card');
       const color = getRarityColor(landmark.rarity);
+      const confText = result?.confidence
+        ? `<p class="celebration-verified">Verified · ${result.confidence}/10 confidence</p>`
+        : '';
 
       scene.style.animation = 'none';
       scene.offsetHeight;
@@ -655,10 +883,11 @@
         <div class="celebration-sparkles">${Array.from({ length: 8 }, (_, i) =>
           `<span class="sparkle" style="top:${10 + Math.random() * 80}%;left:${5 + Math.random() * 90}%;animation-delay:${i * 0.08}s;background:${color}"></span>`
         ).join('')}</div>
-        <div class="celebration-label">UNLOCKED!</div>
+        <div class="celebration-label">COLLECTED!</div>
         <div style="font-size:36px;margin:8px 0">${POI_ICONS[landmark.id] || '📍'}</div>
         <div class="card-name">${landmark.name}</div>
         <span class="rarity-badge ${landmark.rarity}">${landmark.rarity}</span>
+        ${confText}
         <p class="card-flavour">${landmark.flavour}</p>
         <div class="celebration-hint">tap to dismiss</div>
       `;
@@ -705,6 +934,7 @@
     }
 
     function hideBottomSheet() {
+      if (claimInProgress) return;
       document.getElementById('bottom-sheet').classList.remove('open');
     }
 
@@ -717,6 +947,10 @@
       const rarityLabel = landmark.rarity.charAt(0).toUpperCase() + landmark.rarity.slice(1);
 
       card.className = 'landmark-modal-card rarity-' + landmark.rarity;
+      const proofHtml = landmark.proofPhoto
+        ? `<img class="landmark-modal-photo" src="${landmark.proofPhoto}" alt="Your proof photo of ${landmark.name}">
+           <p class="landmark-modal-proof">Verified · ${landmark.proofResult?.confidence ?? '?'}/10</p>`
+        : '';
       card.innerHTML = `
         <button type="button" class="landmark-modal-close" id="landmark-modal-close" aria-label="Close">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
@@ -726,10 +960,11 @@
         <div class="landmark-modal-icon" style="--rarity-color:${color}">${icon}</div>
         <h3 class="landmark-modal-name">${landmark.name}</h3>
         <span class="landmark-modal-rarity" style="color:${color};border-color:${color}40;background:${color}18">${rarityLabel}</span>
+        ${proofHtml}
         <p class="landmark-modal-desc">${landmark.flavour}</p>
         <div class="landmark-modal-status">
           <span class="landmark-modal-status-dot"></span>
-          Unlocked
+          Collected
         </div>
       `;
 
@@ -829,7 +1064,7 @@
     function renderCollection() {
       const unlockedCount = LANDMARKS.filter(l => l.unlocked).length;
       document.getElementById('progress-counter').textContent =
-        unlockedCount + ' / ' + LANDMARKS.length + ' unlocked';
+        unlockedCount + ' / ' + LANDMARKS.length + ' collected';
 
       if (!collectionGridApi) {
         initCollectionGrid();
@@ -1117,6 +1352,7 @@
       requestUserLocation({ centerMap: true });
     });
     document.getElementById('reset-btn').addEventListener('click', resetProgress);
+    document.getElementById('collection-reset-btn').addEventListener('click', resetProgress);
     document.getElementById('photo-capture-btn').addEventListener('click', openPhotoPicker);
     document.getElementById('photo-skip-btn').addEventListener('click', dismissPhotoPrompt);
     document.getElementById('photo-fab').addEventListener('click', openPhotoPicker);
@@ -1124,6 +1360,11 @@
     document.getElementById('photo-input').addEventListener('change', e => {
       const file = e.target.files?.[0];
       handlePhotoSelected(file);
+      e.target.value = '';
+    });
+    document.getElementById('claim-photo-input').addEventListener('change', e => {
+      const file = e.target.files?.[0];
+      handleClaimPhotoSelected(file);
       e.target.value = '';
     });
 
