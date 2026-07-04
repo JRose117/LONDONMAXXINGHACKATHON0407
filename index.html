@@ -47,6 +47,12 @@
         <button type="button" id="photo-capture-btn" class="photo-capture-btn">Take photo</button>
         <button type="button" id="photo-skip-btn" class="photo-skip-btn">Skip for now</button>
       </div>
+      <button type="button" id="photo-fab" class="photo-fab" aria-label="Add a profile photo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 8a2 2 0 0 1 2-2h1.2l.7-1.2A2 2 0 0 1 9.6 4h4.8a2 2 0 0 1 1.7 1l.7 1H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z" stroke="currentColor" stroke-width="1.6"/>
+          <circle cx="12" cy="12.5" r="3.2" stroke="currentColor" stroke-width="1.6"/>
+        </svg>
+      </button>
       <input type="file" id="photo-input" accept="image/*" capture="user" hidden>
     </div>
   </div>
@@ -103,6 +109,7 @@
     // ── Constants ──
     const STORAGE_KEY = 'unlock-london:v1';
     const PROFILE_KEY = 'unlock-london:profile';
+    const PHOTO_SKIP_KEY = 'unlock-london:photo-skip';
     const UNLOCK_RADIUS_M = 100;
     const FUZZ_MIN_M = 55;
     const FUZZ_MAX_M = 165;
@@ -145,9 +152,11 @@
     let map = null;
     let userMarker = null;
     let profilePhotoUrl = null;
+    let photoPromptDismissed = false;
     let userHeading = null;
     let orientationHandler = null;
     const markersById = {};
+    const claimableIds = new Set();
     let geoWatchId = null;
     let hasLocatedUser = false;
     let collectionGridApi = null;
@@ -313,7 +322,12 @@
       el.innerHTML = landmarkMarkerHtml(landmark);
       el.addEventListener('click', e => {
         e.stopPropagation();
-        showBottomSheet(landmark);
+        if (isClaimable(landmark)) {
+          if (navigator.vibrate) navigator.vibrate(30);
+          unlockLandmark(landmark.id);
+        } else {
+          showBottomSheet(landmark);
+        }
       });
 
       const coords = getMarkerCoords(landmark);
@@ -413,6 +427,7 @@
     function loadProfilePhoto() {
       try {
         profilePhotoUrl = localStorage.getItem(PROFILE_KEY);
+        photoPromptDismissed = localStorage.getItem(PHOTO_SKIP_KEY) === '1';
       } catch (e) {
         profilePhotoUrl = null;
       }
@@ -425,6 +440,7 @@
       } catch (e) {
         // Storage full — still show photo this session
       }
+      hidePhotoFab();
       refreshUserMarker();
     }
 
@@ -462,6 +478,21 @@
       document.getElementById('photo-prompt').classList.remove('visible');
     }
 
+    function showPhotoFab() {
+      document.getElementById('photo-fab').classList.add('visible');
+    }
+
+    function hidePhotoFab() {
+      document.getElementById('photo-fab').classList.remove('visible');
+    }
+
+    function dismissPhotoPrompt() {
+      photoPromptDismissed = true;
+      try { localStorage.setItem(PHOTO_SKIP_KEY, '1'); } catch (e) {}
+      hidePhotoPrompt();
+      if (!profilePhotoUrl) showPhotoFab();
+    }
+
     function openPhotoPicker() {
       document.getElementById('photo-input').click();
     }
@@ -479,7 +510,10 @@
     }
 
     function maybeShowPhotoPrompt() {
-      if (!profilePhotoUrl && hasLocatedUser && !demoMode) {
+      if (profilePhotoUrl || !hasLocatedUser || demoMode) return;
+      if (photoPromptDismissed) {
+        showPhotoFab();
+      } else {
         showPhotoPrompt();
       }
     }
@@ -538,29 +572,39 @@
       else map.once('load', apply);
     }
 
+    function isClaimable(lm) {
+      if (!lm || lm.unlocked || !userPos) return false;
+      return haversine(userPos.lat, userPos.lng, lm.lat, lm.lng) <= UNLOCK_RADIUS_M;
+    }
+
     function updateMarkerProximity() {
       LANDMARKS.forEach(lm => {
         const el = getMarkerEl(lm.id);
         if (!el) return;
-        el.classList.remove('nearby', 'in-range');
-        if (lm.unlocked || !userPos) return;
+        el.classList.remove('nearby', 'in-range', 'claimable');
+        if (lm.unlocked || !userPos) {
+          claimableIds.delete(lm.id);
+          return;
+        }
         const dist = haversine(userPos.lat, userPos.lng, lm.lat, lm.lng);
         if (dist <= 300) el.classList.add('nearby');
-        if (dist <= UNLOCK_RADIUS_M) el.classList.add('in-range');
+        if (dist <= UNLOCK_RADIUS_M) {
+          el.classList.add('in-range', 'claimable');
+          if (!claimableIds.has(lm.id)) {
+            claimableIds.add(lm.id);
+            onLandmarkClaimable(lm);
+          }
+        } else {
+          claimableIds.delete(lm.id);
+        }
       });
     }
 
-    // ── Unlock pipeline ──
-    function checkUnlocks() {
-      if (!userPos) return;
-      LANDMARKS.forEach(lm => {
-        if (!lm.unlocked) {
-          const dist = haversine(userPos.lat, userPos.lng, lm.lat, lm.lng);
-          if (dist <= UNLOCK_RADIUS_M) {
-            unlockLandmark(lm.id);
-          }
-        }
-      });
+    // ── Claim pipeline ──
+    // Landmarks in range are not auto-unlocked — they become "claimable"
+    // (gold pulsing pin) and the user taps the pin to unlock them.
+    function onLandmarkClaimable(lm) {
+      if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
     }
 
     function unlockLandmark(id) {
@@ -587,7 +631,6 @@
 
       updateUnlockCircle(lat, lng);
       updateMarkerProximity();
-      checkUnlocks();
 
       if (currentView === 'collection' && collectionGridApi) {
         collectionGridApi.setGridOption('rowData', getCollectionRowData());
@@ -1075,7 +1118,8 @@
     });
     document.getElementById('reset-btn').addEventListener('click', resetProgress);
     document.getElementById('photo-capture-btn').addEventListener('click', openPhotoPicker);
-    document.getElementById('photo-skip-btn').addEventListener('click', hidePhotoPrompt);
+    document.getElementById('photo-skip-btn').addEventListener('click', dismissPhotoPrompt);
+    document.getElementById('photo-fab').addEventListener('click', openPhotoPicker);
     document.getElementById('change-photo-btn').addEventListener('click', openPhotoPicker);
     document.getElementById('photo-input').addEventListener('change', e => {
       const file = e.target.files?.[0];
