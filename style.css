@@ -415,10 +415,6 @@ nav.tabs {
 }
 
 .collection-progress {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
   margin-bottom: 10px;
 }
 
@@ -426,14 +422,6 @@ nav.tabs {
   font-family: var(--header-font);
   font-size: 14px;
   color: var(--text-dim);
-}
-
-.progress-percent {
-  font-family: var(--header-font);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  flex-shrink: 0;
 }
 
 .progress-bar {
@@ -508,6 +496,23 @@ nav.tabs {
 
 .collection-row--locked {
   opacity: 0.65;
+}
+
+.collection-grid .collection-cat-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 10px;
+  padding-right: 4px;
+}
+
+.collection-cat-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.collection-row--locked .collection-cat-icon {
+  opacity: 0.55;
 }
 
 @media (max-width: 520px) {
@@ -1400,17 +1405,25 @@ nav.tabs {
   background: color-mix(in srgb, var(--cat-color) 16%, transparent);
 }
 
-.filter-tile-dot {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--cat-color);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--cat-color) 60%, transparent);
-  opacity: 0.45;
-  transition: opacity 0.15s ease;
+.filter-tile-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  line-height: 1;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--cat-color) 24%, transparent);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--cat-color) 35%, transparent);
+  opacity: 0.72;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
-.filter-tile.active .filter-tile-dot { opacity: 1; }
+.filter-tile.active .filter-tile-icon {
+  opacity: 1;
+  transform: scale(1.04);
+}
 
 .filter-tile-name {
   font-size: 14px;

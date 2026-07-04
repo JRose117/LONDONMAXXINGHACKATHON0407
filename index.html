@@ -76,10 +76,9 @@
 
   <div id="view-collection" class="view">
     <div class="collection-header">
-      <h2>Collection</h2>
+      <h2 id="collection-title">You've completed 0% of London</h2>
       <div class="collection-progress">
         <div class="progress-counter" id="progress-counter">0 / 10 collected</div>
-        <div class="progress-percent" id="progress-percent">0%</div>
       </div>
       <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-bar">
         <div class="progress-bar-fill" id="progress-bar-fill"></div>
@@ -187,6 +186,18 @@
       'Museums & Galleries': '#FFCBA4',          // peach
       'Sports & Leisure Venues': '#FCE38A'       // pastel yellow
     };
+    const CATEGORY_ICONS = {
+      'Landmarks & Monuments': '🏛️',
+      'Places of Worship': '⛪',
+      'Markets & Shopping': '🛒',
+      'Parks & Gardens': '🌳',
+      'Theatres & Music Venues': '🎭',
+      'Historic Buildings & Palaces': '🏰',
+      'Waterways & Public Art': '🌊',
+      'Nature Reserves & City Farms': '🐑',
+      'Museums & Galleries': '🖼️',
+      'Sports & Leisure Venues': '⚽'
+    };
     const CATEGORY_FALLBACK = '#CBD5E1';
 
     const POI_ICONS = {
@@ -237,6 +248,10 @@
 
     function getCategoryColor(category) {
       return CATEGORY_COLORS[category] || CATEGORY_FALLBACK;
+    }
+
+    function getCategoryIcon(category) {
+      return CATEGORY_ICONS[category] || '📍';
     }
 
     function categoryChipHtml(category) {
@@ -318,11 +333,12 @@
       if (!list) return;
       list.innerHTML = ALL_CATEGORIES.map(cat => {
         const color = CATEGORY_COLORS[cat];
+        const icon = getCategoryIcon(cat);
         const on = activeCategories.has(cat);
         return `
           <button type="button" class="filter-tile${on ? ' active' : ''}" data-category="${cat}" style="--cat-color:${color}">
             <span class="filter-tile-check" aria-hidden="true">✓</span>
-            <span class="filter-tile-dot"></span>
+            <span class="filter-tile-icon" aria-hidden="true">${icon}</span>
             <span class="filter-tile-name">${cat}</span>
           </button>
         `;
@@ -1524,6 +1540,7 @@
         .map(({ lm, distanceM }) => ({
           id: lm.id,
           name: lm.unlocked ? lm.name : 'Unknown landmark',
+          category: lm.category,
           distance: getCollectionDistanceLabel(distanceM),
           distanceM,
           unlocked: lm.unlocked
@@ -1535,6 +1552,26 @@
 
       collectionGridApi = agGrid.createGrid(gridEl, {
         columnDefs: [
+          {
+            colId: 'category',
+            headerName: '',
+            width: 48,
+            minWidth: 44,
+            maxWidth: 52,
+            sortable: false,
+            cellClass: 'collection-cat-cell',
+            valueGetter: params => params.data?.category ?? '',
+            cellRenderer: params => {
+              const el = document.createElement('span');
+              el.className = 'collection-cat-icon';
+              el.textContent = getCategoryIcon(params.data?.category);
+              if (params.data?.category) {
+                el.title = params.data.category;
+                el.setAttribute('aria-label', params.data.category);
+              }
+              return el;
+            }
+          },
           {
             field: 'name',
             headerName: 'Landmark',
@@ -1601,16 +1638,19 @@
     function renderCollection() {
       const unlockedCount = LANDMARKS.filter(l => l.unlocked).length;
       const total = LANDMARKS.length;
-      const percent = total > 0 ? Math.round((unlockedCount / total) * 100) : 0;
+      const percent = total > 0
+        ? Math.max(unlockedCount > 0 ? 1 : 0, Math.round((unlockedCount / total) * 100))
+        : 0;
 
+      document.getElementById('collection-title').textContent =
+        "You've completed " + percent + '% of London';
       document.getElementById('progress-counter').textContent =
         unlockedCount + ' / ' + total + ' collected';
-      document.getElementById('progress-percent').textContent = percent + '%';
       document.getElementById('progress-bar-fill').style.width = percent + '%';
 
       const progressBar = document.getElementById('progress-bar');
       progressBar.setAttribute('aria-valuenow', String(percent));
-      progressBar.setAttribute('aria-label', percent + '% of landmarks collected');
+      progressBar.setAttribute('aria-label', "You've completed " + percent + '% of London');
 
       if (!collectionGridApi) {
         initCollectionGrid();
